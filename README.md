@@ -117,3 +117,4 @@ criação do admin e deploy na Vercel.
 
 Desenvolvido para a Igreja RIO | 2026
 # GC_RIO
+# GC_RIO
