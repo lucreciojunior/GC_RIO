@@ -1,0 +1,33 @@
+# Segredos e ambiente (NUNCA versionar)
+.env
+*.env
+!*.env.example
+backend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+backend/venv/
+
+# Vercel
+.vercel
+
+# Node
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Planilhas geradas / temporários
+*.xls
+!data/*.xlsx

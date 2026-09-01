@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/src/pages/login.html"
+    }
+  ]
+}

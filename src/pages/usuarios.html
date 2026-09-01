@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários - Igreja RIO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        :root {
+            --verde-escuro: #1b4332;
+            --verde-medio: #2d6a4f;
+            --verde-claro: #52b788;
+            --verde-suave: #d8f3dc;
+            --verde-bg: #0d2818;
+            --branco: #ffffff;
+            --cinza-fundo: #f8f9fa;
+            --texto: #2b2b2b;
+            --radius: 12px;
+            --danger: #d32f2f;
+            --danger-light: #ffebee;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--cinza-fundo);
+            color: var(--texto);
+            min-height: 100vh;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Card section */
+        .card {
+            background: var(--branco);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--verde-suave);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #c8e6c9;
+        }
+
+        .card-header h2 {
+            font-size: 1.05rem;
+            color: var(--verde-escuro);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Form de cadastro */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--verde-escuro);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 14px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--verde-claro);
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
+            background: var(--branco);
+        }
+
+        .btn-cadastrar {
+            background: linear-gradient(135deg, var(--verde-escuro), var(--verde-medio));
+            color: var(--branco);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-cadastrar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(27, 67, 50, 0.3);
+        }
+
+        /* Tabela de usuários */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        th {
+            background: var(--verde-escuro);
+            color: var(--branco);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #f1f8e9;
+        }
+
+        .badge-perfil {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-admin {
+            background: var(--verde-escuro);
+            color: var(--branco);
+        }
+
+        .badge-lider {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-servo {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .btn-edit:hover {
+            background: #bbdefb;
+        }
+
+        .btn-delete {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            background: #ffcdd2;
+        }
+
+        /* Feedback messages */
+        .feedback {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feedback.success {
+            background: var(--verde-suave);
+            color: var(--verde-escuro);
+            display: flex;
+        }
+
+        .feedback.error {
+            background: var(--danger-light);
+            color: var(--danger);
+            display: flex;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--verde-medio);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            opacity: 0.4;
+            margin-bottom: 12px;
+        }
+
+        /* Modal de edição */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--branco);
+            border-radius: var(--radius);
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: var(--verde-escuro);
+            color: var(--branco);
+            padding: 18px 24px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--branco);
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-body .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-cancelar {
+            background: #f5f5f5;
+            color: var(--texto);
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-cancelar:hover {
+            background: #eee;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .topbar h1 {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="rio-topbar">
+        <div class="rio-topbar-left">
+            <a href="home.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="topbar-title"><i class="fa-solid fa-users-gear"></i> Gerenciar Usuários</div>
+        </div>
+        <div class="rio-topbar-right">
+            <a href="home.html" class="btn-home"><i class="fa-solid fa-house"></i> Início</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Feedback -->
+        <div class="feedback" id="feedback"></div>
+
+        <!-- Cadastrar novo usuário -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-user-plus"></i> Cadastrar Novo Usuário</h2>
+            </div>
+            <div class="card-body">
+                <form id="formCadastro" onsubmit="return cadastrarUsuario(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="novoNome">Nome Completo</label>
+                            <input type="text" id="novoNome" placeholder="Ex: João Silva" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="novoUsuario">Usuário (login)</label>
+                            <input type="text" id="novoUsuario" placeholder="Ex: joao.silva" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="novaSenha">Senha</label>
+                            <input type="password" id="novaSenha" placeholder="Criar senha" required minlength="3">
+                        </div>
+                        <div class="form-group">
+                            <label for="novoPerfil">Perfil / Permissão</label>
+                            <select id="novoPerfil" required>
+                                <option value="">Selecione...</option>
+                                <option value="admin">Administrador (acesso total)</option>
+                                <option value="lider">Líder (contagem + dashboard)</option>
+                                <option value="servo">Servo (apenas contagem)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="novoIgreja">Igreja</label>
+                            <select id="novoIgreja" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-cadastrar">
+                        <i class="fa-solid fa-plus"></i> Cadastrar Usuário
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de usuários -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-list"></i> Usuários Cadastrados</h2>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Usuário</th>
+                                <th>Igreja</th>
+                                <th>Perfil</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaUsuarios">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="emptyState" style="display:none;">
+                    <i class="fa-solid fa-users-slash"></i>
+                    <p>Nenhum usuário cadastrado.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div class="modal-overlay" id="modalEditar">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square"></i> Editar Usuário</h3>
+                <button class="modal-close" onclick="fecharModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editNome">Nome Completo</label>
+                        <input type="text" id="editNome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editUsuario">Usuário (login)</label>
+                        <input type="text" id="editUsuario" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSenha">Nova Senha (deixe vazio para manter)</label>
+                        <input type="password" id="editSenha" placeholder="Nova senha...">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPerfil">Perfil / Permissão</label>
+                        <select id="editPerfil" required>
+                            <option value="admin">Administrador (acesso total)</option>
+                            <option value="lider">Líder (contagem + dashboard)</option>
+                            <option value="servo">Servo (apenas contagem)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editIgreja">Igreja</label>
+                        <select id="editIgreja" required>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+                    <button class="btn-cadastrar" onclick="salvarEdicao()">
+                        <i class="fa-solid fa-check"></i> Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/api.js"></script>
+    <script>
+        // Protege a página - só admin
+        const sessao = protegerPagina(['admin']);
+
+        let usuariosCache = [];
+
+        // Mostrar feedback
+        function mostrarFeedback(msg, tipo) {
+            const el = document.getElementById('feedback');
+            el.className = `feedback ${tipo}`;
+            el.innerHTML = `<i class="fa-solid fa-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+            el.style.display = 'flex';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+        }
+
+        // Cadastrar usuário
+        async function cadastrarUsuario(event) {
+            event.preventDefault();
+
+            const dados = {
+                nome: document.getElementById('novoNome').value.trim(),
+                usuario: document.getElementById('novoUsuario').value.trim().toLowerCase(),
+                senha: document.getElementById('novaSenha').value,
+                perfil: document.getElementById('novoPerfil').value,
+                igreja: document.getElementById('novoIgreja').value || null,
+            };
+
+            try {
+                const novo = await API.criarUsuario(dados);
+                mostrarFeedback(`Usuário "${novo.nome}" cadastrado com sucesso!`, 'success');
+                document.getElementById('formCadastro').reset();
+                await renderTabela();
+            } catch (erro) {
+                mostrarFeedback(erro.message, 'error');
+            }
+            return false;
+        }
+
+        // Renderizar tabela
+        async function renderTabela() {
+            const tbody = document.getElementById('tabelaUsuarios');
+            const empty = document.getElementById('emptyState');
+
+            try {
+                usuariosCache = await API.listarUsuarios();
+            } catch (erro) {
+                mostrarFeedback(erro.message, 'error');
+                return;
+            }
+
+            if (usuariosCache.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            tbody.innerHTML = usuariosCache.map(u => {
+                const badgeClass = u.perfil === 'admin' ? 'badge-admin' : u.perfil === 'lider' ? 'badge-lider' : 'badge-servo';
+                const perfilLabel = u.perfil === 'admin' ? 'Admin' : u.perfil === 'lider' ? 'Líder' : 'Servo';
+                // Não permite excluir a si mesmo
+                const podeExcluir = u.id !== sessao.id;
+                return `
+                    <tr>
+                        <td><strong>${u.nome}</strong></td>
+                        <td>${u.usuario}</td>
+                        <td>${u.igreja || '—'}</td>
+                        <td><span class="badge-perfil ${badgeClass}">${perfilLabel}</span></td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="btn-action btn-edit" onclick="abrirEdicao(${u.id})" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                ${podeExcluir ? `<button class="btn-action btn-delete" onclick="excluirUsuario(${u.id})" title="Excluir">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Excluir usuário
+        async function excluirUsuario(id) {
+            const user = usuariosCache.find(u => u.id === id);
+            if (!confirm(`Tem certeza que deseja excluir "${user?.nome}"?`)) return;
+
+            try {
+                await API.excluirUsuario(id);
+                mostrarFeedback(`Usuário "${user?.nome}" removido.`, 'success');
+                await renderTabela();
+            } catch (erro) {
+                mostrarFeedback(erro.message, 'error');
+            }
+        }
+
+        // Abrir modal de edição
+        function abrirEdicao(id) {
+            const user = usuariosCache.find(u => u.id === id);
+            if (!user) return;
+
+            document.getElementById('editId').value = id;
+            document.getElementById('editNome').value = user.nome;
+            document.getElementById('editUsuario').value = user.usuario;
+            document.getElementById('editSenha').value = '';
+            document.getElementById('editPerfil').value = user.perfil;
+            document.getElementById('editIgreja').value = user.igreja || '';
+            document.getElementById('modalEditar').classList.add('active');
+        }
+
+        // Salvar edição
+        async function salvarEdicao() {
+            const id = parseInt(document.getElementById('editId').value);
+            const senha = document.getElementById('editSenha').value;
+
+            const dados = {
+                nome: document.getElementById('editNome').value.trim(),
+                usuario: document.getElementById('editUsuario').value.trim().toLowerCase(),
+                perfil: document.getElementById('editPerfil').value,
+                igreja: document.getElementById('editIgreja').value || null,
+            };
+            if (senha) dados.senha = senha;
+
+            try {
+                const atualizado = await API.atualizarUsuario(id, dados);
+                fecharModal();
+                mostrarFeedback(`Usuário "${atualizado.nome}" atualizado com sucesso!`, 'success');
+                await renderTabela();
+            } catch (erro) {
+                mostrarFeedback(erro.message, 'error');
+            }
+        }
+
+        // Fechar modal
+        function fecharModal() {
+            document.getElementById('modalEditar').classList.remove('active');
+        }
+
+        document.getElementById('modalEditar').addEventListener('click', function(e) {
+            if (e.target === this) fecharModal();
+        });
+
+        // Carregar igrejas nos selects (do backend)
+        async function carregarIgrejasSelect() {
+            let igrejas = [];
+            try {
+                igrejas = await API.listarIgrejas();
+            } catch (erro) {
+                mostrarFeedback(erro.message, 'error');
+                return;
+            }
+            const selects = [document.getElementById('novoIgreja'), document.getElementById('editIgreja')];
+            selects.forEach(select => {
+                if (!select) return;
+                select.innerHTML = '<option value="">Selecione...</option>';
+                igrejas.forEach(ig => {
+                    const opt = document.createElement('option');
+                    opt.value = ig.nome;
+                    opt.textContent = ig.nome;
+                    select.appendChild(opt);
+                });
+            });
+        }
+
+        // Inicializar
+        (async function init() {
+            await carregarIgrejasSelect();
+            await renderTabela();
+        })();
+    </script>
+
+</body>
+</html>

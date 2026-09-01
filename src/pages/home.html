@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Igreja RIO - Gestão de Culto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --verde-escuro: #1b4332;
+            --verde-medio: #2d6a4f;
+            --verde-claro: #52b788;
+            --verde-suave: #d8f3dc;
+            --verde-bg: #0d2818;
+            --branco: #ffffff;
+            --texto: #2b2b2b;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--verde-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        /* Header com logo */
+        .header-section {
+            margin-bottom: 10px;
+        }
+
+        .logo-circle {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 3px solid var(--verde-claro);
+            margin: 0 auto 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--verde-escuro);
+            overflow: hidden;
+        }
+
+        .logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .title {
+            color: var(--branco);
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: var(--verde-suave);
+            font-size: 0.9rem;
+            font-weight: 300;
+            margin-bottom: 8px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin: 15px 0 30px;
+        }
+
+        .social-links a {
+            color: var(--branco);
+            font-size: 1.4rem;
+            opacity: 0.8;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            opacity: 1;
+            color: var(--verde-claro);
+            transform: scale(1.1);
+        }
+
+        /* Menu de links (estilo Linktree) */
+        .links-section {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .link-card {
+            background: var(--verde-suave);
+            border-radius: var(--radius);
+            padding: 18px 24px;
+            text-decoration: none;
+            color: var(--verde-escuro);
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            border-color: var(--verde-claro);
+            background: var(--branco);
+        }
+
+        .link-card:active {
+            transform: translateY(0);
+        }
+
+        .link-card-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .link-card-content i {
+            font-size: 1.1rem;
+            color: var(--verde-medio);
+            width: 24px;
+            text-align: center;
+        }
+
+        .link-card .arrow {
+            color: var(--verde-medio);
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        .link-card.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .link-card .badge-soon {
+            background: var(--verde-medio);
+            color: var(--branco);
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Footer com info do usuário */
+        .user-footer {
+            margin-top: 35px;
+            padding: 18px 20px;
+            background: rgba(255,255,255,0.04);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .user-footer-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--verde-medio);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--branco);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .user-details {
+            text-align: left;
+        }
+
+        .user-details .user-name {
+            color: var(--branco);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .user-details .user-role {
+            color: var(--verde-claro);
+            font-size: 0.72rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.7);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-logout:hover {
+            background: rgba(211, 47, 47, 0.15);
+            color: #ef5350;
+            border-color: rgba(211, 47, 47, 0.3);
+        }
+
+        .footer-copyright {
+            margin-top: 14px;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header com logo -->
+        <div class="header-section">
+            <div class="logo-circle">
+                <img src="../../assets/images/aldeia.PNG" alt="Logo RIO" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=&quot;color:#52b788;font-size:2.2rem;font-weight:700&quot;>RIO</span>';">
+            </div>
+            <h1 class="title">Igreja Rio - Gestão de Culto</h1>
+            <div class="social-links">
+                <a href="https://instagram.com/igrejario" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+        </div>
+
+        <!-- Links de navegação -->
+        <nav class="links-section">
+            <a href="Contagem_Culto_RIO.html" class="link-card" data-acesso="admin,lider,servo">
+                <div class="link-card-content">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <span>Contagem Geral</span>
+                </div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+
+            <a href="Contagem_RIO.html" class="link-card" data-acesso="admin,lider">
+                <div class="link-card-content">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Dashboard - Relatórios</span>
+                </div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+
+            <a href="#" class="link-card disabled" data-acesso="admin,lider">
+                <div class="link-card-content">
+                    <i class="fa-solid fa-user-check"></i>
+                    <span>Check-in Serviço Gestão</span>
+                </div>
+                <span class="badge-soon">EM BREVE</span>
+            </a>
+
+            <a href="#" class="link-card disabled" data-acesso="admin,lider,servo">
+                <div class="link-card-content">
+                    <i class="fa-solid fa-id-card"></i>
+                    <span>Acesso - Check-in RIO</span>
+                </div>
+                <span class="badge-soon">EM BREVE</span>
+            </a>
+
+            <a href="#" class="link-card disabled" data-acesso="admin,lider">
+                <div class="link-card-content">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Escala de Plantão</span>
+                </div>
+                <span class="badge-soon">EM BREVE</span>
+            </a>
+
+            <a href="#" class="link-card disabled" data-acesso="admin,lider">
+                <div class="link-card-content">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Check List - Gestão de Culto</span>
+                </div>
+                <span class="badge-soon">EM BREVE</span>
+            </a>
+
+            <a href="#" class="link-card disabled" data-acesso="admin,lider">
+                <div class="link-card-content">
+                    <i class="fa-solid fa-cake-candles"></i>
+                    <span>Aniversariantes</span>
+                </div>
+                <span class="badge-soon">EM BREVE</span>
+            </a>
+
+            <!-- Links admin -->
+            <a href="usuarios.html" class="link-card" data-acesso="admin">
+                <div class="link-card-content">
+                    <i class="fa-solid fa-users-gear"></i>
+                    <span>Gerenciar Usuários</span>
+                </div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+
+            <a href="igrejas.html" class="link-card" data-acesso="admin">
+                <div class="link-card-content">
+                    <i class="fa-solid fa-church"></i>
+                    <span>Gerenciar Igrejas</span>
+                </div>
+                <i class="fa-solid fa-chevron-right arrow"></i>
+            </a>
+        </nav>
+
+        <!-- Footer com usuário -->
+        <div class="user-footer">
+            <div class="user-footer-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Usuário</div>
+                    <div class="user-role" id="userRole">Perfil</div>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair da conta
+            </button>
+            <p class="footer-copyright">RIO - Relevante, Integral e Orgânico | 2026</p>
+        </div>
+    </div>
+
+    <script src="../scripts/api.js"></script>
+    <script>
+        function logout() {
+            API.logout();
+        }
+
+        // Labels de perfil
+        function getPerfilLabel(perfil) {
+            const labels = { admin: 'Administrador', lider: 'Líder', servo: 'Servo' };
+            return labels[perfil] || perfil;
+        }
+
+        // Inicializar (protege a página e carrega dados do usuário)
+        const sessao = protegerPagina();
+        if (sessao) {
+            const nome = sessao.nome || sessao.usuario;
+            document.getElementById('userName').textContent = nome;
+            document.getElementById('userRole').textContent = getPerfilLabel(sessao.perfil);
+            document.getElementById('userAvatar').textContent = nome.charAt(0).toUpperCase();
+
+            // Filtrar links por perfil: esconde os que o usuário NÃO tem acesso
+            document.querySelectorAll('.link-card[data-acesso]').forEach(link => {
+                const perfisPermitidos = link.getAttribute('data-acesso').split(',');
+                if (!perfisPermitidos.includes(sessao.perfil)) {
+                    link.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

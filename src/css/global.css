@@ -1,0 +1,284 @@
+/* ==========================================
+   RIO - Gestão de Culto | CSS Global
+   Padrão de cores, fontes e componentes
+   ========================================== */
+
+/* Variáveis globais */
+:root {
+    --verde-escuro: #1b4332;
+    --verde-medio: #2d6a4f;
+    --verde-claro: #52b788;
+    --verde-suave: #d8f3dc;
+    --verde-bg: #0d2818;
+    --branco: #ffffff;
+    --cinza-fundo: #f8f9fa;
+    --texto: #2b2b2b;
+    --texto-muted: #666666;
+    --border-color: #e0e0e0;
+    --shadow: 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-hover: 0 8px 25px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --danger: #d32f2f;
+    --danger-light: #ffebee;
+    --info: #1565c0;
+    --info-light: #e3f2fd;
+    --warning: #f57c00;
+    --warning-light: #fff3e0;
+}
+
+/* Reset e base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    line-height: 1.5;
+}
+
+/* Tipografia */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: var(--verde-escuro);
+}
+
+/* Top Bar padrão para páginas internas */
+.rio-topbar {
+    background: var(--verde-escuro);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.rio-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.rio-topbar-left .btn-back {
+    color: var(--branco);
+    text-decoration: none;
+    font-size: 1.1rem;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.rio-topbar-left .btn-back:hover {
+    opacity: 1;
+}
+
+.rio-topbar-left .topbar-title {
+    color: var(--branco);
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rio-topbar-left .topbar-title i {
+    color: var(--verde-claro);
+    font-size: 0.95rem;
+}
+
+.rio-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rio-topbar-right .btn-home {
+    color: var(--branco);
+    text-decoration: none;
+    background: rgba(255,255,255,0.08);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rio-topbar-right .btn-home:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.25);
+}
+
+/* Botões padrão */
+.rio-btn {
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rio-btn-primary {
+    background: linear-gradient(135deg, var(--verde-escuro), var(--verde-medio));
+    color: var(--branco);
+}
+
+.rio-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(27, 67, 50, 0.3);
+}
+
+.rio-btn-secondary {
+    background: #f5f5f5;
+    color: var(--texto);
+    border: 1px solid var(--border-color);
+}
+
+.rio-btn-secondary:hover {
+    background: #e8e8e8;
+}
+
+.rio-btn-success {
+    background: #25D366;
+    color: var(--branco);
+}
+
+.rio-btn-success:hover {
+    background: #128C7E;
+}
+
+/* Cards */
+.rio-card {
+    background: var(--branco);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.rio-card-header {
+    background: var(--verde-suave);
+    padding: 16px 24px;
+    border-bottom: 1px solid #c8e6c9;
+    font-weight: 600;
+    color: var(--verde-escuro);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rio-card-body {
+    padding: 24px;
+}
+
+/* Inputs padrão */
+.rio-input,
+.rio-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+.rio-input:focus,
+.rio-select:focus {
+    outline: none;
+    border-color: var(--verde-claro);
+    box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
+    background: var(--branco);
+}
+
+.rio-input-readonly {
+    background-color: var(--verde-suave);
+    border-color: var(--verde-claro) !important;
+    font-weight: bold;
+    color: var(--verde-escuro);
+}
+
+/* Badges */
+.rio-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.rio-badge-green {
+    background: var(--verde-suave);
+    color: var(--verde-escuro);
+}
+
+.rio-badge-blue {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.rio-badge-orange {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+/* Grid padrão */
+.rio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+/* Section title padrão */
+.rio-section-title {
+    color: var(--verde-escuro);
+    font-size: 1.1rem;
+    border-bottom: 2px solid var(--verde-suave);
+    padding-bottom: 8px;
+    margin: 25px 0 15px 0;
+    font-weight: 600;
+}
+
+/* Container padrão */
+.rio-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .rio-topbar {
+        padding: 12px 16px;
+    }
+
+    .rio-topbar h1 {
+        font-size: 0.95rem;
+    }
+
+    .rio-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rio-container {
+        padding: 15px;
+    }
+}

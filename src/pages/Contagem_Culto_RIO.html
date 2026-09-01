@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contagem de Culto Igreja RIO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        :root {
+            --verde-escuro: #1b4332;
+            --verde-medio: #2d6a4f;
+            --verde-claro: #52b788;
+            --verde-suave: #d8f3dc;
+            --branco: #ffffff;
+            --cinza-fundo: #f8f9fa;
+            --texto: #2b2b2b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--cinza-fundo);
+            color: var(--texto);
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 20px auto;
+            background: var(--branco);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: var(--verde-escuro);
+            color: var(--branco);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 5px solid var(--verde-claro);
+        }
+
+            .header h1 {
+                font-size: 2.2rem;
+                font-weight: 600;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 1.1rem;
+                color: var(--verde-suave);
+                font-weight: 300;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+            }
+
+        form {
+            padding: 30px;
+        }
+
+        .section-title {
+            color: var(--verde-escuro);
+            font-size: 1.2rem;
+            border-bottom: 2px solid var(--verde-suave);
+            padding-bottom: 8px;
+            margin: 25px 0 15px 0;
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+            .form-group label {
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 6px;
+                color: var(--verde-escuro);
+            }
+
+            .form-group input, .form-group select {
+                padding: 10px 12px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-size: 0.95rem;
+                transition: all 0.3s ease;
+            }
+
+                .form-group input:focus, .form-group select:focus {
+                    outline: none;
+                    border-color: var(--verde-medio);
+                    box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.2);
+                }
+
+        .readonly-input {
+            background-color: var(--verde-suave);
+            border-color: var(--verde-claro) !important;
+            font-weight: bold;
+            color: var(--verde-escuro);
+        }
+
+        .total-geral-box {
+            background-color: var(--verde-escuro);
+            color: var(--branco);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+            .total-geral-box label {
+                color: var(--verde-suave);
+                font-size: 1.1rem;
+                display: block;
+                margin-bottom: 8px;
+            }
+
+            .total-geral-box input {
+                background: transparent;
+                border: none;
+                color: var(--branco);
+                font-size: 2rem;
+                text-align: center;
+                width: 100%;
+                font-weight: bold;
+            }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-salvar {
+            background-color: var(--verde-medio);
+            color: var(--branco);
+            border: none;
+            padding: 14px 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            .btn-salvar:hover {
+                background-color: var(--verde-escuro);
+            }
+
+        .btn-whatsapp {
+            background-color: #25D366;
+            color: var(--branco);
+            border: none;
+            padding: 14px 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            .btn-whatsapp:hover {
+                background-color: #128C7E;
+            }
+
+        /* Modal do Relatório */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--branco);
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background-color: var(--verde-escuro);
+            color: var(--branco);
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--branco);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .relatorio-text {
+            background-color: #f0f4f1;
+            border: 1px solid var(--verde-claro);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: var(--texto);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-copiar {
+            background-color: var(--verde-medio);
+            color: var(--branco);
+            border: none;
+            padding: 12px 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copiar:hover {
+            background-color: var(--verde-escuro);
+        }
+
+        .btn-copiar.copiado {
+            background-color: #25D366;
+        }
+
+        .feedback-msg {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: var(--verde-medio);
+            font-weight: 600;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar de Navegação -->
+    <div class="rio-topbar">
+        <div class="rio-topbar-left">
+            <a href="home.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="topbar-title"><i class="fa-solid fa-clipboard-list"></i> Contagem de Culto</div>
+        </div>
+        <div class="rio-topbar-right">
+            <a href="home.html" class="btn-home"><i class="fa-solid fa-house"></i> Início</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Contagem de Culto Igreja RIO</h1>
+            <p>RIO - Relevante, Integral e Orgânica</p>
+        </div>
+
+        <form id="formContagem">
+
+            <div class="section-title">Informações Gerais</div>
+            <div class="grid">
+                <div class="form-group">
+                    <label for="igreja">Igreja</label>
+                    <select id="igreja" name="Igreja" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="data">Data</label>
+                    <input type="date" id="data" name="Data" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="horario">Horário</label>
+                    <input type="time" id="horario" name="Horario" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="responsavel">Responsável</label>
+                    <input type="text" id="responsavel" name="Responsavel" placeholder="Nome do responsável" required>
+                </div>
+            </div>
+
+            <div class="section-title">Integração e Apoio</div>
+            <div class="grid">
+                <div class="form-group"><label>Integração Servos</label><input type="number" id="integracaoServos" class="calc-servos" value="0" min="0"></div>
+                <div class="form-group"><label>Integração Visitantes</label><input type="number" id="integracaoVisitantes" value="0" min="0"></div>
+                <div class="form-group"><label>Intercessão</label><input type="number" id="intercessao" class="calc-servos" value="0" min="0"></div>
+                <div class="form-group"><label>Gestão de Culto</label><input type="number" id="gestaoCulto" class="calc-servos" value="0" min="0"></div>
+            </div>
+
+            <div class="section-title">Comunicação e Mídia</div>
+            <div class="grid">
+                <div class="form-group"><label>Comunicação</label><input type="number" id="comunicacao" class="calc-servos" value="0" min="0"></div>
+                <div class="form-group"><label>Mídia Servos</label><input type="number" id="midiaServos" class="calc-servos" value="0" min="0"></div>
+                <div class="form-group"><label>Mídia Online</label><input type="number" id="midiaOnline" value="0" min="0"></div>
+                <div class="form-group"><label>Pré-Live</label><input type="number" id="preLive" class="calc-servos" value="0" min="0"></div>
+                <div class="form-group"><label>RIO BAND</label><input type="number" id="rioBand" class="calc-servos" value="0" min="0"></div>
+            </div>
+
+            <div class="section-title">Serviços e Lojas</div>
+            <div class="grid">
+                <div class="form-group"><label>Café RIO</label><input type="number" id="cafeRio" class="calc-servos" value="0" min="0"></div>
+                <div class="form-group"><label>RIO Store</label><input type="number" id="rioStore" class="calc-servos" value="0" min="0"></div>
+            </div>
+
+            <div class="section-title">Ministérios Infantis e Jovens</div>
+            <div class="grid">
+                <div class="form-group"><label>Geração RIO Servos</label><input type="number" id="geracaoRioServos" class="calc-servos" value="0" min="0"></div>
+                <div class="form-group"><label>Geração RIO Crianças</label><input type="number" id="geracaoRioCriancas" value="0" min="0"></div>
+                <div class="form-group"><label>Nauta Servos</label><input type="number" id="nautaServos" class="calc-servos" value="0" min="0"></div>
+                <div class="form-group"><label>Nauta Pré-Adolescentes</label><input type="number" id="nautaPreAdolescentes" value="0" min="0"></div>
+                <div class="form-group"><label>Berçário Adulto</label><input type="number" id="bercarioAdulto" value="0" min="0"></div>
+                <div class="form-group"><label>Berçário Crianças</label><input type="number" id="bercarioCriancas" value="0" min="0"></div>
+            </div>
+
+            <div class="section-title">Estacionamento (RIO Parking)</div>
+            <div class="grid">
+                <div class="form-group"><label>RIO Parking Servos</label><input type="number" id="rioParkingServos" class="calc-servos" value="0" min="0"></div>
+                <div class="form-group"><label>RIO Parking Carros</label><input type="number" id="rioParkingCarros" value="0" min="0"></div>
+                <div class="form-group"><label>RIO Parking Motos</label><input type="number" id="rioParkingMotos" value="0" min="0"></div>
+                <div class="form-group"><label>RIO Parking Bicicletas</label><input type="number" id="rioParkingBicicletas" value="0" min="0"></div>
+            </div>
+
+            <div class="section-title">Presença no Templo</div>
+            <div class="grid">
+                <div class="form-group"><label>Total Templo</label><input type="number" id="totalTemplo" value="0" min="0"></div>
+            </div>
+
+            <div class="section-title">Totais Calculados</div>
+            <div class="grid">
+                <div class="form-group"><label>Total Visitantes</label><input type="number" id="totalVisitante" class="readonly-input" readonly value="0"></div>
+                <div class="form-group"><label>Total de Crianças</label><input type="number" id="totalCriancas" class="readonly-input" readonly value="0"></div>
+                <div class="form-group"><label>Total Nauta</label><input type="number" id="totalNauta" class="readonly-input" readonly value="0"></div>
+                <div class="form-group"><label>Total Servos</label><input type="number" id="totalServos" class="readonly-input" readonly value="0"></div>
+                <div class="form-group"><label>Total Templo</label><input type="number" id="totalTemploCalc" class="readonly-input" readonly value="0"></div>
+            </div>
+
+            <div class="total-geral-box">
+                <label for="totalGeral">TOTAL GERAL</label>
+                <input type="number" id="totalGeral" readonly value="0">
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn-whatsapp" onclick="gerarRelatorio()">📋 Gerar Relatório</button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Modal do Relatório -->
+    <div class="modal-overlay" id="modalRelatorio">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📋 Relatório para Liderança</h2>
+                <button class="modal-close" onclick="fecharModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="relatorio-text" id="relatorioTexto"></div>
+                <div class="modal-actions">
+                    <button class="btn-copiar" onclick="enviarECopiar()">📋 Enviar e Copiar</button>
+                </div>
+                <p class="feedback-msg" id="feedbackMsg">Relatório copiado e dados salvos! Cole no WhatsApp.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script>
+        // Proteger página - requer login
+        const sessaoAtual = verificarSessao();
+
+        // Carregar igrejas do backend e pré-selecionar a do usuário
+        (async function carregarIgrejas() {
+            const select = document.getElementById('igreja');
+
+            // Se o usuário não é admin, trava no campo da igreja dele
+            if (sessaoAtual && sessaoAtual.igreja && sessaoAtual.perfil !== 'admin') {
+                const opt = document.createElement('option');
+                opt.value = sessaoAtual.igreja;
+                opt.textContent = sessaoAtual.igreja;
+                select.appendChild(opt);
+                select.value = sessaoAtual.igreja;
+                select.disabled = true;
+                select.style.backgroundColor = '#d8f3dc';
+                select.style.fontWeight = 'bold';
+                select.style.color = '#1b4332';
+                return;
+            }
+
+            // Admin: carrega todas as igrejas do backend
+            try {
+                const igrejas = await API.listarIgrejas();
+                igrejas.forEach(ig => {
+                    const opt = document.createElement('option');
+                    opt.value = ig.nome;
+                    opt.textContent = ig.nome;
+                    select.appendChild(opt);
+                });
+                if (sessaoAtual && sessaoAtual.igreja) {
+                    select.value = sessaoAtual.igreja;
+                }
+            } catch (erro) {
+                console.error('Erro ao carregar igrejas:', erro.message);
+            }
+        })();
+    </script>
+    <script>
+        function getVal(id) {
+            return parseInt(document.getElementById(id).value) || 0;
+        }
+
+        function calcular() {
+            // Total Visitante = Integração Visitantes
+            const totalVisitante = getVal('integracaoVisitantes');
+            document.getElementById('totalVisitante').value = totalVisitante;
+
+            // Total Crianças = Geração RIO Crianças + Berçário Crianças
+            const totalCriancas = getVal('geracaoRioCriancas') + getVal('bercarioCriancas');
+            document.getElementById('totalCriancas').value = totalCriancas;
+
+            // Total Nauta = Nauta Pré-Adolescentes
+            const totalNauta = getVal('nautaPreAdolescentes');
+            document.getElementById('totalNauta').value = totalNauta;
+
+            // Total Servos = Soma de TODOS os servos
+            const totalServos = getVal('integracaoServos') +
+                getVal('intercessao') +
+                getVal('gestaoCulto') +
+                getVal('comunicacao') +
+                getVal('midiaServos') +
+                getVal('preLive') +
+                getVal('rioBand') +
+                getVal('cafeRio') +
+                getVal('rioStore') +
+                getVal('geracaoRioServos') +
+                getVal('nautaServos') +
+                getVal('rioParkingServos');
+            document.getElementById('totalServos').value = totalServos;
+
+            // Total Templo (campo preenchido manualmente - já inclui berçário adulto)
+            const totalTemplo = getVal('totalTemplo');
+            document.getElementById('totalTemploCalc').value = totalTemplo;
+
+            // Total Geral = soma de todos os totais
+            const totalGeral = totalVisitante + totalCriancas + totalNauta + totalServos + totalTemplo;
+            document.getElementById('totalGeral').value = totalGeral;
+        }
+
+        // Adiciona evento de recálculo dinâmico a todos os campos numéricos
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', calcular);
+        });
+
+        // Salvar dados na planilha Excel
+        function salvarPlanilha() {
+            const form = document.getElementById('formContagem');
+            let tabelaHTML = `<table border="1"><tr>`;
+
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                let label = input.previousElementSibling ? input.previousElementSibling.innerText : input.id;
+                if (input.id === 'totalGeral') label = 'TOTAL GERAL';
+                tabelaHTML += `<th style="background-color: #1b4332; color: #ffffff;">${label}</th>`;
+            });
+            tabelaHTML += `</tr><tr>`;
+
+            inputs.forEach(input => {
+                tabelaHTML += `<td>${input.value}</td>`;
+            });
+            tabelaHTML += `</tr></table>`;
+
+            const blob = new Blob(['\ufeff' + tabelaHTML], { type: 'application/vnd.ms-excel' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'ContagemCultoRIO.xls';
+            link.click();
+        }
+
+        // Gerar relatório formatado para WhatsApp
+        function gerarRelatorio() {
+            const igreja = document.getElementById('igreja').value || '—';
+            const data = document.getElementById('data').value;
+            const horario = document.getElementById('horario').value || '—';
+            const responsavel = document.getElementById('responsavel').value || '—';
+
+            // Formatar data para dd/mm/aaaa
+            let dataFormatada = '—';
+            if (data) {
+                const [ano, mes, dia] = data.split('-');
+                dataFormatada = `${dia}/${mes}/${ano}`;
+            }
+
+            const relatorio = `⛪ *CONTAGEM DE CULTO - IGREJA RIO*
+━━━━━━━━━━━━━━━━━━━━━
+
+📍 *Igreja:* ${igreja}
+📅 *Data:* ${dataFormatada}
+🕐 *Horário:* ${horario}
+👤 *Responsável:* ${responsavel}
+
+━━━━━━━━━━━━━━━━━━━━━
+📊 *RESUMO DOS TOTAIS*
+━━━━━━━━━━━━━━━━━━━━━
+
+🏛️ *Total Templo:* ${getVal('totalTemplo')}
+🙏 *Total Servos:* ${getVal('totalServos')}
+👶 *Total Crianças:* ${getVal('totalCriancas')}
+🧒 *Total Nauta (Pré-Adolescentes):* ${getVal('nautaPreAdolescentes')}
+🆕 *Total Visitantes:* ${getVal('totalVisitante')}
+
+━━━━━━━━━━━━━━━━━━━━━
+🎯 *TOTAL GERAL: ${getVal('totalGeral')} pessoas*
+━━━━━━━━━━━━━━━━━━━━━
+
+📋 *DETALHAMENTO POR MINISTÉRIO*
+
+*Integração e Apoio:*
+• Integração Servos: ${getVal('integracaoServos')}
+• Integração Visitantes: ${getVal('integracaoVisitantes')}
+• Intercessão: ${getVal('intercessao')}
+• Gestão de Culto: ${getVal('gestaoCulto')}
+
+*Comunicação e Mídia:*
+• Comunicação: ${getVal('comunicacao')}
+• Mídia Servos: ${getVal('midiaServos')}
+• Mídia Online: ${getVal('midiaOnline')}
+• RIO BAND: ${getVal('rioBand')}
+
+*Serviços:*
+• Café RIO: ${getVal('cafeRio')}
+• RIO Store: ${getVal('rioStore')}
+
+*Ministérios Infantis:*
+• Geração RIO Servos: ${getVal('geracaoRioServos')}
+• Geração RIO Crianças: ${getVal('geracaoRioCriancas')}
+• Nauta Servos: ${getVal('nautaServos')}
+• Nauta Pré-Adolescentes: ${getVal('nautaPreAdolescentes')}
+• Berçário Adulto: ${getVal('bercarioAdulto')}
+• Berçário Crianças: ${getVal('bercarioCriancas')}
+
+*RIO Parking:*
+• Servos: ${getVal('rioParkingServos')}
+• Carros: ${getVal('rioParkingCarros')}
+• Motos: ${getVal('rioParkingMotos')}
+• Biciletas: ${getVal('rioParkingBicicletas')}
+
+━━━━━━━━━━━━━━━━━━━━━
+_RIO - Relevante, Integral e Orgânico_`;
+
+            document.getElementById('relatorioTexto').textContent = relatorio;
+            document.getElementById('modalRelatorio').classList.add('active');
+        }
+
+        // Enviar e Copiar: copia o relatório + salva no banco
+        async function enviarECopiar() {
+            const texto = document.getElementById('relatorioTexto').textContent;
+
+            // Copiar para clipboard
+            navigator.clipboard.writeText(texto).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = texto;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            });
+
+            // Salvar a contagem no banco de dados
+            await salvarContagemNoBanco();
+        }
+
+        // Monta o objeto da contagem e envia ao backend
+        async function salvarContagemNoBanco() {
+            const btn = document.querySelector('.btn-copiar');
+            const data = document.getElementById('data').value;
+
+            if (!data) {
+                mostrarFeedbackModal('Preencha a data antes de salvar.', true);
+                return;
+            }
+
+            // Todos os campos por ministério vão no objeto "dados"
+            const dados = {};
+            document.querySelectorAll('#formContagem input[type="number"]').forEach(inp => {
+                dados[inp.id] = getVal(inp.id);
+            });
+
+            const contagem = {
+                igreja: document.getElementById('igreja').value,
+                data: data,
+                horario: document.getElementById('horario').value || null,
+                responsavel: document.getElementById('responsavel').value || null,
+                total_visitantes: getVal('totalVisitante'),
+                total_criancas: getVal('totalCriancas'),
+                total_nauta: getVal('totalNauta'),
+                total_servos: getVal('totalServos'),
+                total_templo: getVal('totalTemplo'),
+                total_geral: getVal('totalGeral'),
+                dados: dados,
+            };
+
+            btn.disabled = true;
+            const textoOriginal = btn.textContent;
+            btn.textContent = '⏳ Salvando...';
+
+            try {
+                await API.salvarContagem(contagem);
+                mostrarFeedbackModal('✅ Relatório copiado e contagem salva no banco!', false);
+            } catch (erro) {
+                mostrarFeedbackModal('Copiado, mas erro ao salvar: ' + erro.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = textoOriginal;
+            }
+        }
+
+        function mostrarFeedbackModal(msg, isErro) {
+            const btn = document.querySelector('.btn-copiar');
+            const feedback = document.getElementById('feedbackMsg');
+            feedback.textContent = msg;
+            feedback.style.display = 'block';
+            feedback.style.color = isErro ? '#d32f2f' : '#2d6a4f';
+            if (!isErro) {
+                btn.classList.add('copiado');
+            }
+            setTimeout(() => {
+                btn.classList.remove('copiado');
+                feedback.style.display = 'none';
+            }, 4000);
+        }
+
+        // Fechar modal
+        function fecharModal() {
+            document.getElementById('modalRelatorio').classList.remove('active');
+        }
+
+        // Fechar modal clicando fora
+        document.getElementById('modalRelatorio').addEventListener('click', function(e) {
+            if (e.target === this) fecharModal();
+        });
+    </script>
+
+</body>
+</html>

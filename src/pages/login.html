@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Igreja RIO Gestão de Culto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --verde-escuro: #1b4332;
+            --verde-medio: #2d6a4f;
+            --verde-claro: #52b788;
+            --verde-suave: #d8f3dc;
+            --verde-bg: #0d2818;
+            --branco: #ffffff;
+            --cinza-fundo: #f8f9fa;
+            --texto: #2b2b2b;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--verde-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo-section {
+            margin-bottom: 40px;
+        }
+
+        .logo-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--verde-claro);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--verde-escuro);
+            overflow: hidden;
+        }
+
+        .logo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo-text {
+            color: var(--branco);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .logo-text span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .logo-text .rio {
+            color: var(--verde-claro);
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        .logo-subtitle {
+            color: var(--verde-suave);
+            font-size: 0.85rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .login-card {
+            background: var(--branco);
+            border-radius: var(--radius);
+            padding: 35px 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .login-card h2 {
+            color: var(--verde-escuro);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--verde-escuro);
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--verde-medio);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--verde-claro);
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
+            background: var(--branco);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--verde-escuro), var(--verde-medio));
+            color: var(--branco);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(27, 67, 50, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .error-msg {
+            color: #d32f2f;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .footer-text {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.75rem;
+            margin-top: 30px;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="logo-circle">
+                <img src="../../assets/images/aldeia.PNG" alt="Logo RIO" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=&quot;color:#52b788;font-size:2rem;font-weight:700&quot;>RIO</span>';">
+            </div>
+            <div class="logo-text">
+                <span><span class="rio">RIO</span></span>
+            </div>
+            <div class="logo-subtitle">Gestão de Culto</div>
+        </div>
+
+        <div class="login-card">
+            <h2><i class="fa-solid fa-lock" style="margin-right: 8px;"></i>Acesso ao Sistema</h2>
+
+            <form id="loginForm" onsubmit="return fazerLogin(event)">
+                <div class="form-group">
+                    <label for="usuario">Usuário</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="usuario" placeholder="Digite seu usuário" required autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-key"></i>
+                        <input type="password" id="senha" placeholder="Digite sua senha" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i>Entrar
+                </button>
+
+                <p class="error-msg" id="errorMsg">Usuário ou senha incorretos.</p>
+            </form>
+        </div>
+
+        <p class="footer-text">Igreja RIO - Relevante, Integral e Orgânico</p>
+    </div>
+
+    <script src="../scripts/api.js"></script>
+    <script>
+        async function fazerLogin(event) {
+            event.preventDefault();
+
+            const usuario = document.getElementById('usuario').value.trim();
+            const senha = document.getElementById('senha').value;
+            const btn = document.querySelector('.btn-login');
+            const errorMsg = document.getElementById('errorMsg');
+
+            // Estado de carregamento
+            const textoOriginal = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entrando...';
+            errorMsg.style.display = 'none';
+
+            try {
+                await API.login(usuario, senha);
+                window.location.href = 'home.html';
+            } catch (erro) {
+                errorMsg.textContent = erro.message || 'Usuário ou senha incorretos.';
+                errorMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+            }
+
+            return false;
+        }
+
+        // Se já está logado, redireciona
+        if (getSessao() && getSessao().token) {
+            window.location.href = 'home.html';
+        }
+    </script>
+
+</body>
+</html>
