@@ -1,30 +1,35 @@
 /* ==========================================
    RIO - Gestão de Culto | CSS Global
-   Padrão de cores, fontes e componentes
+   Visual moderno inspirado em igrejario.org
+   Foco em mobile-first
    ========================================== */
 
 /* Variáveis globais */
 :root {
-    --verde-escuro: #1b4332;
+    --verde-escuro: #14352a;
     --verde-medio: #2d6a4f;
     --verde-claro: #52b788;
-    --verde-suave: #d8f3dc;
+    --verde-suave: #e6f4ec;
     --verde-bg: #0d2818;
     --branco: #ffffff;
-    --cinza-fundo: #f8f9fa;
-    --texto: #2b2b2b;
-    --texto-muted: #666666;
-    --border-color: #e0e0e0;
-    --shadow: 0 4px 12px rgba(0,0,0,0.05);
-    --shadow-hover: 0 8px 25px rgba(0,0,0,0.12);
-    --radius: 12px;
-    --radius-sm: 8px;
+    --cinza-fundo: #f4f6f5;
+    --texto: #1f2a24;
+    --texto-muted: #6b7770;
+    --border-color: #e6eae8;
+    --shadow-sm: 0 1px 3px rgba(20, 53, 42, 0.06);
+    --shadow: 0 6px 20px rgba(20, 53, 42, 0.08);
+    --shadow-hover: 0 12px 32px rgba(20, 53, 42, 0.14);
+    --radius-lg: 20px;
+    --radius: 16px;
+    --radius-sm: 10px;
     --danger: #d32f2f;
     --danger-light: #ffebee;
     --info: #1565c0;
     --info-light: #e3f2fd;
     --warning: #f57c00;
     --warning-light: #fff3e0;
+    --success: #25D366;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Reset e base */
@@ -32,29 +37,41 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
     font-family: 'Inter', sans-serif;
     color: var(--texto);
-    line-height: 1.5;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Tipografia */
 h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--verde-escuro);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
-/* Top Bar padrão para páginas internas */
+/* ==========================================
+   Top Bar (páginas internas)
+   ========================================== */
 .rio-topbar {
-    background: var(--verde-escuro);
-    padding: 0 24px;
-    height: 56px;
+    background: linear-gradient(135deg, var(--verde-escuro), var(--verde-medio));
+    padding: 0 16px;
+    min-height: 60px;
+    padding-top: env(safe-area-inset-top, 0);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -63,119 +80,130 @@ h1, h2, h3, h4, h5, h6 {
 .rio-topbar-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+    min-width: 0;
 }
 
 .rio-topbar-left .btn-back {
     color: var(--branco);
     text-decoration: none;
-    font-size: 1.1rem;
-    opacity: 0.7;
-    transition: opacity 0.3s;
+    font-size: 1.05rem;
+    opacity: 0.85;
+    transition: opacity var(--transition);
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
-.rio-topbar-left .btn-back:hover {
+.rio-topbar-left .btn-back:active {
     opacity: 1;
+    background: rgba(255,255,255,0.12);
 }
 
 .rio-topbar-left .topbar-title {
     color: var(--branco);
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .rio-topbar-left .topbar-title i {
     color: var(--verde-claro);
-    font-size: 0.95rem;
+    font-size: 1rem;
+    flex-shrink: 0;
 }
 
 .rio-topbar-right {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .rio-topbar-right .btn-home {
     color: var(--branco);
     text-decoration: none;
-    background: rgba(255,255,255,0.08);
-    padding: 7px 14px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+    background: rgba(255,255,255,0.12);
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-size: 0.82rem;
     font-weight: 500;
-    transition: all 0.3s;
-    border: 1px solid rgba(255,255,255,0.12);
+    transition: all var(--transition);
+    border: 1px solid rgba(255,255,255,0.15);
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.rio-topbar-right .btn-home:hover {
-    background: rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.25);
+.rio-topbar-right .btn-home:active {
+    background: rgba(255,255,255,0.22);
 }
 
-/* Botões padrão */
+/* ==========================================
+   Botões
+   ========================================== */
 .rio-btn {
     border: none;
-    padding: 12px 24px;
+    padding: 14px 24px;
     border-radius: var(--radius-sm);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
-    transition: all 0.3s ease;
+    transition: all var(--transition);
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
+    min-height: 48px;
 }
 
 .rio-btn-primary {
     background: linear-gradient(135deg, var(--verde-escuro), var(--verde-medio));
     color: var(--branco);
+    box-shadow: 0 4px 14px rgba(45, 106, 79, 0.28);
 }
 
-.rio-btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(27, 67, 50, 0.3);
+.rio-btn-primary:active {
+    transform: scale(0.98);
 }
 
 .rio-btn-secondary {
-    background: #f5f5f5;
+    background: var(--branco);
     color: var(--texto);
-    border: 1px solid var(--border-color);
-}
-
-.rio-btn-secondary:hover {
-    background: #e8e8e8;
+    border: 1.5px solid var(--border-color);
 }
 
 .rio-btn-success {
-    background: #25D366;
+    background: var(--success);
     color: var(--branco);
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.28);
 }
 
-.rio-btn-success:hover {
-    background: #128C7E;
-}
-
-/* Cards */
+/* ==========================================
+   Cards
+   ========================================== */
 .rio-card {
     background: var(--branco);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     overflow: hidden;
+    border: 1px solid var(--border-color);
 }
 
 .rio-card-header {
     background: var(--verde-suave);
-    padding: 16px 24px;
-    border-bottom: 1px solid #c8e6c9;
+    padding: 16px 20px;
+    border-bottom: 1px solid #d3e8db;
     font-weight: 600;
     color: var(--verde-escuro);
     display: flex;
@@ -184,27 +212,30 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .rio-card-body {
-    padding: 24px;
+    padding: 20px;
 }
 
-/* Inputs padrão */
+/* ==========================================
+   Inputs
+   ========================================== */
 .rio-input,
 .rio-select {
     width: 100%;
-    padding: 10px 14px;
+    padding: 13px 15px;
     border: 1.5px solid var(--border-color);
     border-radius: var(--radius-sm);
-    font-size: 0.9rem;
+    font-size: 16px; /* 16px evita zoom automático no iOS */
     font-family: 'Inter', sans-serif;
-    transition: all 0.3s ease;
-    background: #fafafa;
+    transition: all var(--transition);
+    background: #fafbfa;
+    color: var(--texto);
 }
 
 .rio-input:focus,
 .rio-select:focus {
     outline: none;
     border-color: var(--verde-claro);
-    box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
+    box-shadow: 0 0 0 4px rgba(82, 183, 136, 0.15);
     background: var(--branco);
 }
 
@@ -215,70 +246,80 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--verde-escuro);
 }
 
-/* Badges */
+/* ==========================================
+   Badges
+   ========================================== */
 .rio-badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.03em;
     display: inline-block;
 }
 
-.rio-badge-green {
-    background: var(--verde-suave);
-    color: var(--verde-escuro);
-}
+.rio-badge-green { background: var(--verde-suave); color: var(--verde-medio); }
+.rio-badge-blue { background: var(--info-light); color: var(--info); }
+.rio-badge-orange { background: var(--warning-light); color: var(--warning); }
 
-.rio-badge-blue {
-    background: var(--info-light);
-    color: var(--info);
-}
-
-.rio-badge-orange {
-    background: var(--warning-light);
-    color: var(--warning);
-}
-
-/* Grid padrão */
+/* ==========================================
+   Grid / Container / Títulos
+   ========================================== */
 .rio-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
 }
 
-/* Section title padrão */
 .rio-section-title {
     color: var(--verde-escuro);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     border-bottom: 2px solid var(--verde-suave);
     padding-bottom: 8px;
-    margin: 25px 0 15px 0;
-    font-weight: 600;
+    margin: 24px 0 14px 0;
+    font-weight: 700;
 }
 
-/* Container padrão */
 .rio-container {
     max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 20px 16px;
 }
 
-/* Responsividade */
+/* ==========================================
+   Animações utilitárias
+   ========================================== */
+@keyframes rio-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.rio-fade-in {
+    animation: rio-fade-in 0.4s ease both;
+}
+
+/* ==========================================
+   Responsividade / Mobile
+   ========================================== */
 @media (max-width: 768px) {
-    .rio-topbar {
-        padding: 12px 16px;
-    }
-
-    .rio-topbar h1 {
-        font-size: 0.95rem;
-    }
-
     .rio-grid {
         grid-template-columns: 1fr;
     }
-
     .rio-container {
-        padding: 15px;
+        padding: 16px 14px;
+    }
+    .rio-topbar-left .topbar-title {
+        font-size: 0.98rem;
+    }
+}
+
+/* Telas bem pequenas */
+@media (max-width: 380px) {
+    .rio-topbar-right .btn-home span {
+        display: none; /* mostra só o ícone da casa */
+    }
+    .rio-topbar-right .btn-home {
+        padding: 9px 11px;
     }
 }
