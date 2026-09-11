@@ -422,18 +422,22 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/config.js"></script>
     <script src="../scripts/api.js"></script>
     <script src="../scripts/auth.js"></script>
     <script>
-        // Proteger página - requer login
-        const sessaoAtual = verificarSessao();
+        let sessaoAtual = null;
 
-        // Carregar igrejas do backend e pré-selecionar a do usuário
-        (async function carregarIgrejas() {
+        // Proteger página e carregar igrejas
+        (async function iniciar() {
+            sessaoAtual = await verificarSessao();
+            if (!sessaoAtual) return;
+
             const select = document.getElementById('igreja');
 
             // Se o usuário não é admin, trava no campo da igreja dele
-            if (sessaoAtual && sessaoAtual.igreja && sessaoAtual.perfil !== 'admin') {
+            if (sessaoAtual.igreja && sessaoAtual.perfil !== 'admin') {
                 const opt = document.createElement('option');
                 opt.value = sessaoAtual.igreja;
                 opt.textContent = sessaoAtual.igreja;
@@ -446,7 +450,7 @@
                 return;
             }
 
-            // Admin: carrega todas as igrejas do backend
+            // Admin: carrega todas as igrejas
             try {
                 const igrejas = await API.listarIgrejas();
                 igrejas.forEach(ig => {
@@ -455,7 +459,7 @@
                     opt.textContent = ig.nome;
                     select.appendChild(opt);
                 });
-                if (sessaoAtual && sessaoAtual.igreja) {
+                if (sessaoAtual.igreja) {
                     select.value = sessaoAtual.igreja;
                 }
             } catch (erro) {

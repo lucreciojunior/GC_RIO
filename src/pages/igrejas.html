@@ -441,10 +441,10 @@
     </div>
 
     <script src="../scripts/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/config.js"></script>
+    <script src="../scripts/api.js"></script>
     <script>
-        // Protege a página - só admin
-        protegerPagina(['admin']);
-
         let igrejasCache = [];
 
         // Feedback
@@ -570,7 +570,11 @@
         });
 
         // Inicializar
-        renderIgrejas();
+        (async function init() {
+            const sessao = await protegerPagina(['admin']);
+            if (!sessao) return;
+            await renderIgrejas();
+        })();
     </script>
 
 </body>

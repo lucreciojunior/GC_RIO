@@ -384,7 +384,7 @@
                         </div>
                         <div class="form-group">
                             <label for="novaSenha">Senha</label>
-                            <input type="password" id="novaSenha" placeholder="Criar senha" required minlength="3">
+                            <input type="password" id="novaSenha" placeholder="Mínimo 6 caracteres" required minlength="6">
                         </div>
                         <div class="form-group">
                             <label for="novoPerfil">Perfil / Permissão</label>
@@ -421,8 +421,8 @@
                             <tr>
                                 <th>Nome</th>
                                 <th>Usuário</th>
-                                <th>Igreja</th>
                                 <th>Perfil</th>
+                                <th>Igreja</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -453,14 +453,6 @@
                         <input type="text" id="editNome" required>
                     </div>
                     <div class="form-group">
-                        <label for="editUsuario">Usuário (login)</label>
-                        <input type="text" id="editUsuario" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editSenha">Nova Senha (deixe vazio para manter)</label>
-                        <input type="password" id="editSenha" placeholder="Nova senha...">
-                    </div>
-                    <div class="form-group">
                         <label for="editPerfil">Perfil / Permissão</label>
                         <select id="editPerfil" required>
                             <option value="admin">Administrador (acesso total)</option>
@@ -474,6 +466,9 @@
                         </select>
                     </div>
                 </div>
+                <p style="font-size:0.8rem; color:#666; margin-top:4px;">
+                    <i class="fa-solid fa-circle-info"></i> O nome de usuário e a senha não podem ser alterados aqui.
+                </p>
                 <div class="modal-actions">
                     <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
                     <button class="btn-cadastrar" onclick="salvarEdicao()">
@@ -484,23 +479,22 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/config.js"></script>
     <script src="../scripts/api.js"></script>
     <script>
-        // Protege a página - só admin
-        const sessao = protegerPagina(['admin']);
-
+        let sessao = null;
         let usuariosCache = [];
 
-        // Mostrar feedback
         function mostrarFeedback(msg, tipo) {
             const el = document.getElementById('feedback');
             el.className = `feedback ${tipo}`;
             el.innerHTML = `<i class="fa-solid fa-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
             el.style.display = 'flex';
-            setTimeout(() => { el.style.display = 'none'; }, 4000);
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
         }
 
-        // Cadastrar usuário
+        // Cadastrar usuário (cria conta no Supabase Auth + perfil via trigger)
         async function cadastrarUsuario(event) {
             event.preventDefault();
 
@@ -513,8 +507,8 @@
             };
 
             try {
-                const novo = await API.criarUsuario(dados);
-                mostrarFeedback(`Usuário "${novo.nome}" cadastrado com sucesso!`, 'success');
+                await API.criarUsuario(dados);
+                mostrarFeedback(`Usuário "${dados.nome}" cadastrado! Ele já pode fazer login.`, 'success');
                 document.getElementById('formCadastro').reset();
                 await renderTabela();
             } catch (erro) {
@@ -545,20 +539,19 @@
             tbody.innerHTML = usuariosCache.map(u => {
                 const badgeClass = u.perfil === 'admin' ? 'badge-admin' : u.perfil === 'lider' ? 'badge-lider' : 'badge-servo';
                 const perfilLabel = u.perfil === 'admin' ? 'Admin' : u.perfil === 'lider' ? 'Líder' : 'Servo';
-                // Não permite excluir a si mesmo
                 const podeExcluir = u.id !== sessao.id;
                 return `
                     <tr>
                         <td><strong>${u.nome}</strong></td>
-                        <td>${u.usuario}</td>
-                        <td>${u.igreja || '—'}</td>
+                        <td>${u.usuario || '—'}</td>
                         <td><span class="badge-perfil ${badgeClass}">${perfilLabel}</span></td>
+                        <td>${u.igreja || '—'}</td>
                         <td>
                             <div class="actions-cell">
-                                <button class="btn-action btn-edit" onclick="abrirEdicao(${u.id})" title="Editar">
+                                <button class="btn-action btn-edit" onclick="abrirEdicao('${u.id}')" title="Editar">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
-                                ${podeExcluir ? `<button class="btn-action btn-delete" onclick="excluirUsuario(${u.id})" title="Excluir">
+                                ${podeExcluir ? `<button class="btn-action btn-delete" onclick="excluirUsuario('${u.id}')" title="Excluir">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>` : ''}
                             </div>
@@ -568,10 +561,9 @@
             }).join('');
         }
 
-        // Excluir usuário
         async function excluirUsuario(id) {
             const user = usuariosCache.find(u => u.id === id);
-            if (!confirm(`Tem certeza que deseja excluir "${user?.nome}"?`)) return;
+            if (!confirm(`Remover o acesso de "${user?.nome}"?`)) return;
 
             try {
                 await API.excluirUsuario(id);
@@ -582,44 +574,35 @@
             }
         }
 
-        // Abrir modal de edição
         function abrirEdicao(id) {
             const user = usuariosCache.find(u => u.id === id);
             if (!user) return;
 
             document.getElementById('editId').value = id;
             document.getElementById('editNome').value = user.nome;
-            document.getElementById('editUsuario').value = user.usuario;
-            document.getElementById('editSenha').value = '';
             document.getElementById('editPerfil').value = user.perfil;
             document.getElementById('editIgreja').value = user.igreja || '';
             document.getElementById('modalEditar').classList.add('active');
         }
 
-        // Salvar edição
         async function salvarEdicao() {
-            const id = parseInt(document.getElementById('editId').value);
-            const senha = document.getElementById('editSenha').value;
-
+            const id = document.getElementById('editId').value;
             const dados = {
                 nome: document.getElementById('editNome').value.trim(),
-                usuario: document.getElementById('editUsuario').value.trim().toLowerCase(),
                 perfil: document.getElementById('editPerfil').value,
                 igreja: document.getElementById('editIgreja').value || null,
             };
-            if (senha) dados.senha = senha;
 
             try {
                 const atualizado = await API.atualizarUsuario(id, dados);
                 fecharModal();
-                mostrarFeedback(`Usuário "${atualizado.nome}" atualizado com sucesso!`, 'success');
+                mostrarFeedback(`Usuário "${atualizado.nome}" atualizado!`, 'success');
                 await renderTabela();
             } catch (erro) {
                 mostrarFeedback(erro.message, 'error');
             }
         }
 
-        // Fechar modal
         function fecharModal() {
             document.getElementById('modalEditar').classList.remove('active');
         }
@@ -628,7 +611,7 @@
             if (e.target === this) fecharModal();
         });
 
-        // Carregar igrejas nos selects (do backend)
+        // Carregar igrejas nos selects
         async function carregarIgrejasSelect() {
             let igrejas = [];
             try {
@@ -652,6 +635,8 @@
 
         // Inicializar
         (async function init() {
+            sessao = await protegerPagina(['admin']);
+            if (!sessao) return;
             await carregarIgrejasSelect();
             await renderTabela();
         })();

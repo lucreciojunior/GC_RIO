@@ -1061,18 +1061,20 @@
             });
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/config.js"></script>
     <script src="../scripts/api.js"></script>
     <script src="../scripts/auth.js"></script>
     <script>
-        // Proteger página - requer login com perfil admin ou lider
-        verificarPerfil(['admin', 'lider']);
+        // Protege (admin/lider), carrega dados do banco e monta o dashboard
+        (async function iniciarDashboard() {
+            const sessao = await verificarPerfil(['admin', 'lider']);
+            if (!sessao) return;
 
-        // Run on load: carrega dados do banco e monta o dashboard
-        window.onload = async function() {
             await carregarDadosDoBanco();
             initFilters();
             updateDashboard();
-        };
+        })();
     </script>
 </body>
 </html>

@@ -1,29 +1,17 @@
 /* ==========================================
    RIO - Autenticação (compatibilidade)
-   Este arquivo agora depende de api.js.
-   Inclua api.js ANTES de auth.js nas páginas.
+   Depende de config.js e api.js (Supabase).
+   Carregue nesta ordem: supabase-js, config.js, api.js, auth.js
    ========================================== */
 
-// Verificar se está logado (redireciona ao login se não)
-function verificarSessao() {
-    const sessao = getSessao();
-    if (!sessao || !sessao.token) {
-        window.location.href = "login.html";
-        return null;
-    }
-    return sessao;
+// Protege a página: exige login (async). Retorna o perfil ou redireciona.
+async function verificarSessao() {
+    return await protegerPagina();
 }
 
-// Verificar se tem um dos perfis permitidos
-function verificarPerfil(perfisPermitidos) {
-    const sessao = verificarSessao();
-    if (!sessao) return null;
-
-    if (!perfisPermitidos.includes(sessao.perfil)) {
-        window.location.href = "home.html";
-        return null;
-    }
-    return sessao;
+// Protege exigindo um dos perfis permitidos (async).
+async function verificarPerfil(perfisPermitidos) {
+    return await protegerPagina(perfisPermitidos);
 }
 
 // Logout

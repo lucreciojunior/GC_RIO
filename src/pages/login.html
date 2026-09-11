@@ -234,6 +234,8 @@
         <p class="footer-text">Igreja RIO - Relevante, Integral e Orgânico</p>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/config.js"></script>
     <script src="../scripts/api.js"></script>
     <script>
         async function fazerLogin(event) {
@@ -244,7 +246,6 @@
             const btn = document.querySelector('.btn-login');
             const errorMsg = document.getElementById('errorMsg');
 
-            // Estado de carregamento
             const textoOriginal = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entrando...';
@@ -263,10 +264,13 @@
             return false;
         }
 
-        // Se já está logado, redireciona
-        if (getSessao() && getSessao().token) {
-            window.location.href = 'home.html';
-        }
+        // Se já está logado, redireciona para a home
+        (async function () {
+            const { data: { session } } = await _sb.auth.getSession();
+            if (session) {
+                window.location.href = 'home.html';
+            }
+        })();
     </script>
 
 </body>

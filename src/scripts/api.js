@@ -1,192 +1,229 @@
 /* ==========================================
-   RIO - Camada de API
-   Comunicação com o backend FastAPI
+   RIO - Camada de dados (Supabase direto)
+   Requer: config.js e a lib supabase-js carregada antes deste arquivo.
    ========================================== */
 
-// URL base do backend - detecta automaticamente o ambiente.
-// - Local (localhost/127.0.0.1): usa o backend local na porta 8000
-// - Produção: usa a URL do backend publicado na Vercel
-//
-// IMPORTANTE: depois de publicar o backend, troque a URL de produção abaixo
-// pela URL real do seu backend na Vercel (ex: https://contagem-rio-api.vercel.app)
-const API_BASE_URL = (function () {
-    const host = window.location.hostname;
-    const ehLocal = host === "localhost" || host === "127.0.0.1" || host === "";
-    if (ehLocal) {
-        return "http://localhost:8000";
-    }
-    // >>> TROQUE pela URL do seu backend publicado na Vercel <<<
-    return "https://contagem-rio-api.vercel.app";
-})();
+// Cria o cliente Supabase (global window.supabase vem do CDN)
+const _sb = window.supabase.createClient(
+    SUPABASE_CONFIG.url,
+    SUPABASE_CONFIG.anonKey
+);
 
-// ------------------------------------------------------------
-// Sessão / Token
-// ------------------------------------------------------------
-function getToken() {
-    const sessao = sessionStorage.getItem("rio_sessao");
-    if (!sessao) return null;
-    try {
-        return JSON.parse(sessao).token || null;
-    } catch {
-        return null;
-    }
+// Domínio interno para o "e-mail sintético".
+// O usuário loga só com nome; por baixo usamos nome@rio.local no Auth.
+const DOMINIO_INTERNO = "rio.local";
+
+// Converte um nome de usuário em e-mail sintético
+function usuarioParaEmail(usuario) {
+    const limpo = String(usuario).trim().toLowerCase().replace(/\s+/g, "");
+    // Se já for um e-mail, usa como está
+    if (limpo.includes("@")) return limpo;
+    return `${limpo}@${DOMINIO_INTERNO}`;
 }
 
+// ------------------------------------------------------------
+// Sessão em cache (perfil do usuário logado)
+// ------------------------------------------------------------
 function getSessao() {
-    const sessao = sessionStorage.getItem("rio_sessao");
-    return sessao ? JSON.parse(sessao) : null;
+    const s = sessionStorage.getItem("rio_perfil");
+    return s ? JSON.parse(s) : null;
 }
 
-function salvarSessao(dados) {
-    sessionStorage.setItem("rio_sessao", JSON.stringify(dados));
+function salvarPerfilLocal(perfil) {
+    sessionStorage.setItem("rio_perfil", JSON.stringify(perfil));
 }
 
-function limparSessao() {
-    sessionStorage.removeItem("rio_sessao");
+function limparPerfilLocal() {
+    sessionStorage.removeItem("rio_perfil");
 }
 
 // ------------------------------------------------------------
-// Helper genérico de requisição
+// Carrega o perfil do usuário logado (nome, perfil, igreja)
 // ------------------------------------------------------------
-async function apiRequest(caminho, opcoes = {}) {
-    const headers = {
-        "Content-Type": "application/json",
-        ...(opcoes.headers || {}),
+async function carregarPerfil() {
+    const { data: { user } } = await _sb.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await _sb
+        .from("perfis")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+    if (error || !data) return null;
+
+    const perfil = {
+        id: user.id,
+        email: user.email,
+        nome: data.nome,
+        perfil: data.perfil,
+        igreja: data.igreja,
     };
-
-    const token = getToken();
-    if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    let resposta;
-    try {
-        resposta = await fetch(`${API_BASE_URL}${caminho}`, {
-            ...opcoes,
-            headers,
-        });
-    } catch (erro) {
-        throw new Error(
-            "Não foi possível conectar ao servidor. Verifique se o backend está rodando."
-        );
-    }
-
-    // 401 = token inválido/expirado -> volta pro login
-    if (resposta.status === 401) {
-        limparSessao();
-        if (!window.location.pathname.endsWith("login.html")) {
-            window.location.href = "login.html";
-        }
-        throw new Error("Sessão expirada. Faça login novamente.");
-    }
-
-    // 204 = sem conteúdo (delete)
-    if (resposta.status === 204) {
-        return null;
-    }
-
-    const dados = await resposta.json().catch(() => ({}));
-
-    if (!resposta.ok) {
-        const msg = dados.detail || "Ocorreu um erro na requisição.";
-        throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
-    }
-
-    return dados;
+    salvarPerfilLocal(perfil);
+    return perfil;
 }
 
 // ------------------------------------------------------------
-// API - endpoints organizados
+// API - operações
 // ------------------------------------------------------------
 const API = {
-    // Autenticação
+    // ---- Autenticação ----
     async login(usuario, senha) {
-        const dados = await apiRequest("/auth/login", {
-            method: "POST",
-            body: JSON.stringify({ usuario, senha }),
+        const { error } = await _sb.auth.signInWithPassword({
+            email: usuarioParaEmail(usuario),
+            password: senha,
         });
-        // Salva sessão com token + dados do usuário
-        salvarSessao({
-            token: dados.access_token,
-            ...dados.usuario,
-        });
-        return dados;
+        if (error) {
+            throw new Error("Usuário ou senha incorretos.");
+        }
+        const perfil = await carregarPerfil();
+        if (!perfil) {
+            throw new Error("Usuário sem perfil configurado. Contate o administrador.");
+        }
+        return perfil;
     },
 
-    logout() {
-        limparSessao();
+    async logout() {
+        await _sb.auth.signOut();
+        limparPerfilLocal();
         window.location.href = "login.html";
     },
 
-    // Usuários
-    listarUsuarios() {
-        return apiRequest("/usuarios");
-    },
-    criarUsuario(usuario) {
-        return apiRequest("/usuarios", {
-            method: "POST",
-            body: JSON.stringify(usuario),
-        });
-    },
-    atualizarUsuario(id, dados) {
-        return apiRequest(`/usuarios/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(dados),
-        });
-    },
-    excluirUsuario(id) {
-        return apiRequest(`/usuarios/${id}`, { method: "DELETE" });
+    // ---- Usuários (perfis) ----
+    async listarUsuarios() {
+        const { data, error } = await _sb
+            .from("perfis")
+            .select("*")
+            .order("nome");
+        if (error) throw new Error(error.message);
+        return data;
     },
 
-    // Igrejas
-    listarIgrejas() {
-        return apiRequest("/igrejas");
-    },
-    criarIgreja(igreja) {
-        return apiRequest("/igrejas", {
-            method: "POST",
-            body: JSON.stringify(igreja),
+    // Cria usuário no Auth + perfil (via metadados no cadastro).
+    // O login é por nome de usuário; guardamos nome@rio.local no Auth.
+    // Para uso interno, desative "Confirm email" em Auth > Providers.
+    async criarUsuario({ usuario, senha, nome, perfil, igreja }) {
+        const login = String(usuario).trim().toLowerCase().replace(/\s+/g, "");
+        const { data, error } = await _sb.auth.signUp({
+            email: usuarioParaEmail(login),
+            password: senha,
+            options: {
+                data: { nome, usuario: login, perfil, igreja },
+            },
         });
-    },
-    atualizarIgreja(id, dados) {
-        return apiRequest(`/igrejas/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(dados),
-        });
-    },
-    excluirIgreja(id) {
-        return apiRequest(`/igrejas/${id}`, { method: "DELETE" });
+        if (error) {
+            if (String(error.message).toLowerCase().includes("already")) {
+                throw new Error("Já existe um usuário com esse nome.");
+            }
+            throw new Error(error.message);
+        }
+        return data;
     },
 
-    // Contagens
-    salvarContagem(contagem) {
-        return apiRequest("/contagens", {
-            method: "POST",
-            body: JSON.stringify(contagem),
-        });
+    async atualizarUsuario(id, dados) {
+        // Atualiza apenas o perfil (nome/perfil/igreja). Senha/email são geridos no Auth.
+        const { data, error } = await _sb
+            .from("perfis")
+            .update(dados)
+            .eq("id", id)
+            .select()
+            .single();
+        if (error) throw new Error(error.message);
+        return data;
     },
-    listarContagens(filtros = {}) {
-        const params = new URLSearchParams();
-        if (filtros.igreja) params.set("igreja", filtros.igreja);
-        if (filtros.data_inicio) params.set("data_inicio", filtros.data_inicio);
-        if (filtros.data_fim) params.set("data_fim", filtros.data_fim);
-        const qs = params.toString();
-        return apiRequest(`/contagens${qs ? "?" + qs : ""}`);
+
+    async excluirUsuario(id) {
+        // Remove o perfil. (A conta no Auth permanece; para remover 100%,
+        // é necessário o painel do Supabase ou uma Edge Function.)
+        const { error } = await _sb.from("perfis").delete().eq("id", id);
+        if (error) throw new Error(error.message);
+    },
+
+    // ---- Igrejas ----
+    async listarIgrejas() {
+        const { data, error } = await _sb.from("igrejas").select("*").order("nome");
+        if (error) throw new Error(error.message);
+        return data;
+    },
+
+    async criarIgreja({ nome, endereco }) {
+        const { data, error } = await _sb
+            .from("igrejas")
+            .insert({ nome, endereco })
+            .select()
+            .single();
+        if (error) throw new Error(traduzErro(error));
+        return data;
+    },
+
+    async atualizarIgreja(id, dados) {
+        const { data, error } = await _sb
+            .from("igrejas")
+            .update(dados)
+            .eq("id", id)
+            .select()
+            .single();
+        if (error) throw new Error(traduzErro(error));
+        return data;
+    },
+
+    async excluirIgreja(id) {
+        const { error } = await _sb.from("igrejas").delete().eq("id", id);
+        if (error) throw new Error(error.message);
+    },
+
+    // ---- Contagens ----
+    async salvarContagem(contagem) {
+        const { data: { user } } = await _sb.auth.getUser();
+        const registro = { ...contagem, criado_por: user ? user.id : null };
+        const { data, error } = await _sb
+            .from("contagens")
+            .insert(registro)
+            .select()
+            .single();
+        if (error) throw new Error(error.message);
+        return data;
+    },
+
+    async listarContagens(filtros = {}) {
+        let q = _sb.from("contagens").select("*").order("data", { ascending: false });
+        if (filtros.igreja) q = q.eq("igreja", filtros.igreja);
+        if (filtros.data_inicio) q = q.gte("data", filtros.data_inicio);
+        if (filtros.data_fim) q = q.lte("data", filtros.data_fim);
+        const { data, error } = await q;
+        if (error) throw new Error(error.message);
+        return data;
     },
 };
+
+// Traduz erros comuns do Postgres para mensagens amigáveis
+function traduzErro(error) {
+    if (error.code === "23505") return "Já existe um registro com esse nome.";
+    return error.message || "Ocorreu um erro.";
+}
 
 // ------------------------------------------------------------
 // Proteção de páginas
 // ------------------------------------------------------------
-function protegerPagina(perfisPermitidos = null) {
-    const sessao = getSessao();
-    if (!sessao || !sessao.token) {
+async function protegerPagina(perfisPermitidos = null) {
+    const { data: { session } } = await _sb.auth.getSession();
+    if (!session) {
         window.location.href = "login.html";
         return null;
     }
-    if (perfisPermitidos && !perfisPermitidos.includes(sessao.perfil)) {
+
+    let perfil = getSessao();
+    if (!perfil) {
+        perfil = await carregarPerfil();
+    }
+    if (!perfil) {
+        window.location.href = "login.html";
+        return null;
+    }
+
+    if (perfisPermitidos && !perfisPermitidos.includes(perfil.perfil)) {
         window.location.href = "home.html";
         return null;
     }
-    return sessao;
+    return perfil;
 }

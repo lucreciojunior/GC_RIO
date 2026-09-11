@@ -351,6 +351,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/config.js"></script>
     <script src="../scripts/api.js"></script>
     <script>
         function logout() {
@@ -364,9 +366,11 @@
         }
 
         // Inicializar (protege a página e carrega dados do usuário)
-        const sessao = protegerPagina();
-        if (sessao) {
-            const nome = sessao.nome || sessao.usuario;
+        (async function init() {
+            const sessao = await protegerPagina();
+            if (!sessao) return;
+
+            const nome = sessao.nome || sessao.email;
             document.getElementById('userName').textContent = nome;
             document.getElementById('userRole').textContent = getPerfilLabel(sessao.perfil);
             document.getElementById('userAvatar').textContent = nome.charAt(0).toUpperCase();
@@ -378,7 +382,7 @@
                     link.style.display = 'none';
                 }
             });
-        }
+        })();
     </script>
 
 </body>
