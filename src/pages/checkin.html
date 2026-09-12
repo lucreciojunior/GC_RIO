@@ -86,6 +86,16 @@
         .feedback.show { display: flex; align-items: center; gap: 8px; }
         .feedback.success { background: var(--verde-suave); color: var(--verde-medio); }
         .feedback.error { background: var(--danger-light); color: var(--danger); }
+
+        /* Estatísticas do histórico */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 8px; }
+        .stat {
+            background: var(--branco); border: 1px solid var(--border-color); border-radius: 14px;
+            padding: 14px; text-align: center; box-shadow: var(--shadow-sm);
+        }
+        .stat .valor { font-size: 1.6rem; font-weight: 800; color: var(--verde-escuro); line-height: 1; }
+        .stat .rotulo { font-size: 0.72rem; color: var(--texto-muted); font-weight: 600; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.3px; }
+        .rank-badge { background: var(--verde-medio); color: #fff; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -144,6 +154,12 @@
                     <input type="date" id="histInicio" title="Data inicial">
                     <input type="date" id="histFim" title="Data final">
                 </div>
+                <!-- Resumo estatístico -->
+                <div class="stats-grid" id="statsCheckin"></div>
+                <!-- Ranking -->
+                <div class="section-title"><i class="fa-solid fa-ranking-star"></i> Servos mais presentes</div>
+                <div class="lista" id="rankingHist"></div>
+                <div class="section-title" style="margin-top:20px;"><i class="fa-solid fa-clock-rotate-left"></i> Presenças por dia</div>
                 <div id="listaHistorico"></div>
                 <div class="empty" id="emptyHist" style="display:none;">
                     <i class="fa-solid fa-calendar-xmark"></i>
@@ -286,8 +302,41 @@
 
             const cont = document.getElementById('listaHistorico');
             const empty = document.getElementById('emptyHist');
-            if (dados.length === 0) { cont.innerHTML = ''; empty.style.display = 'block'; return; }
+            const stats = document.getElementById('statsCheckin');
+            const rank = document.getElementById('rankingHist');
+
+            if (dados.length === 0) {
+                cont.innerHTML = ''; stats.innerHTML = ''; rank.innerHTML = '';
+                empty.style.display = 'block'; return;
+            }
             empty.style.display = 'none';
+
+            // Estatísticas
+            const datasUnicas = [...new Set(dados.map(c => c.data))];
+            const servosUnicos = new Set(dados.map(c => c.servo_id)).size;
+            const mediaDia = datasUnicas.length ? Math.round(dados.length / datasUnicas.length) : 0;
+            stats.innerHTML = `
+                <div class="stat"><div class="valor">${dados.length}</div><div class="rotulo">Check-ins</div></div>
+                <div class="stat"><div class="valor">${servosUnicos}</div><div class="rotulo">Servos</div></div>
+                <div class="stat"><div class="valor">${datasUnicas.length}</div><div class="rotulo">Dias</div></div>
+                <div class="stat"><div class="valor">${mediaDia}</div><div class="rotulo">Média/dia</div></div>`;
+
+            // Ranking de presença
+            const contador = {};
+            dados.forEach(c => {
+                contador[c.servo_id] = contador[c.servo_id] || { nome: c.servo_nome, igreja: c.igreja, n: 0 };
+                contador[c.servo_id].n++;
+            });
+            const ranking = Object.values(contador).sort((a,b) => b.n - a.n).slice(0, 10);
+            rank.innerHTML = ranking.map((r, i) => `
+                <div class="servo-item">
+                    <div class="avatar rank-badge">${i + 1}º</div>
+                    <div class="info">
+                        <div class="nome">${r.nome}</div>
+                        <div class="detalhe">${r.igreja}</div>
+                    </div>
+                    <button class="btn-toggle presente" style="pointer-events:none;">${r.n} presença${r.n>1?'s':''}</button>
+                </div>`).join('');
 
             // Agrupa por data
             const grupos = {};
