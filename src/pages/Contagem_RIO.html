@@ -518,6 +518,8 @@
             <button class="tab-btn" onclick="switchTab('tab-ministerios')"><i class="fa-solid fa-chart-pie"></i> Análise por Ministérios</button>
             <button class="tab-btn" onclick="switchTab('tab-estatisticas')"><i class="fa-solid fa-chart-column"></i> Demografia & Operacional</button>
             <button class="tab-btn" onclick="switchTab('tab-dados')"><i class="fa-solid fa-table"></i> Tabela Detalhada</button>
+            <button class="tab-btn" onclick="switchTab('tab-checkins')"><i class="fa-solid fa-user-check"></i> Check-ins</button>
+            <button class="tab-btn" onclick="switchTab('tab-aniversarios')"><i class="fa-solid fa-cake-candles"></i> Aniversariantes</button>
         </div>
 
         <!-- TAB 1: Visão Geral & Evolução -->
@@ -620,6 +622,45 @@
                         <!-- Dynamic content -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- TAB 5: Check-ins -->
+        <div id="tab-checkins" class="tab-content">
+            <div class="table-card">
+                <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
+                    <input type="date" id="chk-data" style="padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.9rem;">
+                    <span id="chk-resumo" style="color:#666; font-size:0.9rem; font-weight:600;"></span>
+                </div>
+                <table id="chk-table">
+                    <thead>
+                        <tr><th>Servo</th><th>Igreja</th><th>Data</th><th>Horário</th></tr>
+                    </thead>
+                    <tbody id="chk-body"></tbody>
+                </table>
+                <div id="chk-empty" style="display:none; text-align:center; padding:30px; color:#999;">
+                    Nenhum check-in no período.
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: Aniversariantes -->
+        <div id="tab-aniversarios" class="tab-content">
+            <div class="table-card">
+                <div style="display:flex; gap:10px; margin-bottom:16px; align-items:center;">
+                    <label style="font-weight:600; color:var(--primary-dark, #1b5e20);">Mês:</label>
+                    <select id="aniv-mes" style="padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.9rem;"></select>
+                    <span id="aniv-resumo" style="color:#666; font-size:0.9rem; font-weight:600;"></span>
+                </div>
+                <table id="aniv-table">
+                    <thead>
+                        <tr><th>Dia</th><th>Nome</th><th>Igreja</th></tr>
+                    </thead>
+                    <tbody id="aniv-body"></tbody>
+                </table>
+                <div id="aniv-empty" style="display:none; text-align:center; padding:30px; color:#999;">
+                    Nenhum aniversariante neste mês.
+                </div>
             </div>
         </div>
 
@@ -1074,7 +1115,79 @@
             await carregarDadosDoBanco();
             initFilters();
             updateDashboard();
+            initCheckinsTab();
+            initAniversariosTab();
         })();
+
+        const MESES_DASH = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+        function fmtDataBR(iso) {
+            const [a,m,d] = iso.split('-'); return `${d}/${m}/${a}`;
+        }
+
+        // ---- Aba Check-ins ----
+        function initCheckinsTab() {
+            const input = document.getElementById('chk-data');
+            input.value = new Date().toISOString().slice(0,10);
+            input.addEventListener('change', carregarCheckinsDash);
+            carregarCheckinsDash();
+        }
+
+        async function carregarCheckinsDash() {
+            const data = document.getElementById('chk-data').value || null;
+            let dados = [];
+            try { dados = await API.listarCheckins(data); } catch (e) { console.warn(e.message); }
+
+            const body = document.getElementById('chk-body');
+            const empty = document.getElementById('chk-empty');
+            document.getElementById('chk-resumo').textContent = `${dados.length} presente(s)`;
+
+            if (!dados.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
+            empty.style.display = 'none';
+            body.innerHTML = dados.map(c => `
+                <tr>
+                    <td><strong>${c.servo_nome}</strong></td>
+                    <td>${c.igreja}</td>
+                    <td>${fmtDataBR(c.data)}</td>
+                    <td>${(c.horario||'').slice(0,5)}</td>
+                </tr>`).join('');
+        }
+
+        // ---- Aba Aniversariantes ----
+        let anivTodos = [];
+        function initAniversariosTab() {
+            const sel = document.getElementById('aniv-mes');
+            const mesAtual = new Date().getMonth();
+            sel.innerHTML = MESES_DASH.map((m,i) => `<option value="${i}" ${i===mesAtual?'selected':''}>${m}</option>`).join('');
+            sel.addEventListener('change', renderAnivDash);
+            carregarAnivDash();
+        }
+
+        async function carregarAnivDash() {
+            try { anivTodos = await API.listarAniversariantes(); } catch (e) { console.warn(e.message); }
+            renderAnivDash();
+        }
+
+        function renderAnivDash() {
+            const mes = parseInt(document.getElementById('aniv-mes').value);
+            const doMes = anivTodos
+                .map(p => { const [a,m,d] = p.data_nascimento.split('-').map(Number); return {...p, _dia:d, _mes:m-1}; })
+                .filter(p => p._mes === mes)
+                .sort((a,b) => a._dia - b._dia);
+
+            const body = document.getElementById('aniv-body');
+            const empty = document.getElementById('aniv-empty');
+            document.getElementById('aniv-resumo').textContent = `${doMes.length} aniversariante(s)`;
+
+            if (!doMes.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
+            empty.style.display = 'none';
+            body.innerHTML = doMes.map(p => `
+                <tr>
+                    <td><strong>${String(p._dia).padStart(2,'0')}/${String(p._mes+1).padStart(2,'0')}</strong></td>
+                    <td>${p.nome}</td>
+                    <td>${p.igreja || '—'}</td>
+                </tr>`).join('');
+        }
     </script>
 </body>
 </html>

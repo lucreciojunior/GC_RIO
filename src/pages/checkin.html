@@ -10,85 +10,79 @@
     <style>
         body { background-color: var(--cinza-fundo); min-height: 100vh; }
 
-        .data-hoje {
-            text-align: center;
-            color: var(--texto-muted);
-            font-size: 0.9rem;
-            margin-bottom: 18px;
-        }
+        .data-hoje { text-align: center; color: var(--texto-muted); font-size: 0.9rem; margin-bottom: 16px; }
         .data-hoje strong { color: var(--verde-escuro); }
 
-        /* Card do próprio check-in (servo) */
         .meu-checkin {
             background: linear-gradient(135deg, var(--verde-escuro), var(--verde-medio));
-            color: #fff;
-            border-radius: var(--radius);
-            padding: 24px 20px;
-            text-align: center;
-            margin-bottom: 22px;
-            box-shadow: 0 8px 24px rgba(20,53,42,0.2);
+            color: #fff; border-radius: var(--radius); padding: 24px 20px;
+            text-align: center; margin-bottom: 22px; box-shadow: 0 8px 24px rgba(20,53,42,0.2);
         }
         .meu-checkin h2 { color: #fff; font-size: 1.1rem; margin-bottom: 4px; }
         .meu-checkin p { color: var(--verde-suave); font-size: 0.85rem; margin-bottom: 16px; }
         .btn-checkin {
-            width: 100%;
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 1rem;
-            font-weight: 700;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            min-height: 54px;
-            transition: transform 0.2s;
+            width: 100%; border: none; border-radius: 12px; padding: 16px;
+            font-size: 1rem; font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer;
+            min-height: 54px; transition: transform 0.2s;
         }
         .btn-checkin:active { transform: scale(0.98); }
         .btn-checkin.marcar { background: #fff; color: var(--verde-escuro); }
         .btn-checkin.marcado { background: rgba(255,255,255,0.15); color: #fff; border: 1.5px solid rgba(255,255,255,0.4); }
 
-        .section-title {
-            font-size: 1.05rem; font-weight: 700; color: var(--verde-escuro);
-            margin: 22px 0 12px; display: flex; align-items: center; gap: 8px;
+        /* Abas */
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #fff; padding: 6px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .tab { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; color: var(--texto-muted); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; }
+        .tab.active { background: var(--verde-suave); color: var(--verde-medio); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Filtro igreja (admin) */
+        .filtro-igreja { margin-bottom: 14px; }
+        .filtro-igreja select {
+            width: 100%; padding: 12px 14px; border: 1.5px solid var(--border-color);
+            border-radius: 10px; font-size: 16px; font-family: 'Inter', sans-serif; background: #fff;
         }
-        .contador { font-size: 0.8rem; color: var(--texto-muted); font-weight: 500; }
+        .filtro-data { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+        .filtro-data input { flex: 1; min-width: 130px; padding: 12px; border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 16px; font-family: 'Inter', sans-serif; background: #fff; }
+
+        .section-title { font-size: 1rem; font-weight: 700; color: var(--verde-escuro); margin: 18px 0 12px; display: flex; align-items: center; gap: 8px; }
+        .contador { font-size: 0.78rem; color: var(--texto-muted); font-weight: 500; }
 
         .lista { display: flex; flex-direction: column; gap: 10px; }
 
         .servo-item {
-            background: var(--branco);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 12px 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: var(--shadow-sm);
+            background: var(--branco); border: 1px solid var(--border-color); border-radius: 14px;
+            padding: 12px 14px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
         }
         .servo-item .avatar {
             width: 42px; height: 42px; border-radius: 50%;
             background: linear-gradient(135deg, var(--verde-medio), var(--verde-claro));
-            color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .servo-item.presente .avatar { background: linear-gradient(135deg, #25D366, #128C7E); }
         .servo-item .info { flex: 1; min-width: 0; }
         .servo-item .nome { font-weight: 600; color: var(--verde-escuro); }
         .servo-item .detalhe { font-size: 0.78rem; color: var(--texto-muted); }
         .servo-item .btn-toggle {
-            border: none; border-radius: 999px; padding: 9px 16px;
-            font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
-            flex-shrink: 0; min-height: 40px;
+            border: none; border-radius: 999px; padding: 9px 16px; font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; font-family: 'Inter', sans-serif; flex-shrink: 0; min-height: 40px;
         }
         .btn-toggle.marcar { background: var(--verde-suave); color: var(--verde-medio); }
         .btn-toggle.presente { background: #25D366; color: #fff; }
 
+        /* Histórico agrupado por data */
+        .grupo-data { margin-bottom: 18px; }
+        .grupo-data .cabecalho {
+            font-weight: 700; color: var(--verde-escuro); font-size: 0.9rem;
+            padding: 8px 4px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .grupo-data .cabecalho .qtd { font-size: 0.75rem; color: #fff; background: var(--verde-medio); padding: 3px 10px; border-radius: 999px; }
+
         .empty { text-align: center; padding: 40px 20px; color: var(--texto-muted); }
         .empty i { font-size: 2.3rem; opacity: 0.35; margin-bottom: 10px; display: block; }
 
-        .feedback {
-            padding: 12px 16px; border-radius: 10px; font-size: 0.85rem;
-            margin-bottom: 16px; display: none;
-        }
+        .feedback { padding: 12px 16px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
         .feedback.show { display: flex; align-items: center; gap: 8px; }
         .feedback.success { background: var(--verde-suave); color: var(--verde-medio); }
         .feedback.error { background: var(--danger-light); color: var(--danger); }
@@ -108,7 +102,7 @@
 
     <div class="rio-container">
         <div class="feedback" id="feedback"></div>
-        <div class="data-hoje">Check-in de <strong id="dataHoje"></strong></div>
+        <div class="data-hoje">Hoje é <strong id="dataHoje"></strong></div>
 
         <!-- Card do próprio check-in -->
         <div class="meu-checkin" id="meuCheckin" style="display:none;">
@@ -119,16 +113,42 @@
             </button>
         </div>
 
-        <!-- Lista de servos (líder/admin) -->
+        <!-- Área de gestão (líder/admin) -->
         <div id="areaGestao" style="display:none;">
-            <div class="section-title">
-                <i class="fa-solid fa-users"></i> Servos
-                <span class="contador" id="contador"></span>
+            <div class="tabs">
+                <button class="tab active" data-tab="hoje" onclick="trocarAba('hoje')">Hoje</button>
+                <button class="tab" data-tab="historico" onclick="trocarAba('historico')">Histórico</button>
             </div>
-            <div class="lista" id="listaServos"></div>
-            <div class="empty" id="emptyServos" style="display:none;">
-                <i class="fa-solid fa-users-slash"></i>
-                <p>Nenhum servo cadastrado na sua igreja.</p>
+
+            <!-- Filtro de igreja (só admin) -->
+            <div class="filtro-igreja" id="filtroIgrejaBox" style="display:none;">
+                <select id="filtroIgreja"><option value="">Todas as igrejas</option></select>
+            </div>
+
+            <!-- ABA HOJE -->
+            <div class="tab-content active" id="tab-hoje">
+                <div class="section-title">
+                    <i class="fa-solid fa-users"></i> Servos
+                    <span class="contador" id="contador"></span>
+                </div>
+                <div class="lista" id="listaServos"></div>
+                <div class="empty" id="emptyServos" style="display:none;">
+                    <i class="fa-solid fa-users-slash"></i>
+                    <p>Nenhum servo encontrado.</p>
+                </div>
+            </div>
+
+            <!-- ABA HISTÓRICO -->
+            <div class="tab-content" id="tab-historico">
+                <div class="filtro-data">
+                    <input type="date" id="histInicio" title="Data inicial">
+                    <input type="date" id="histFim" title="Data final">
+                </div>
+                <div id="listaHistorico"></div>
+                <div class="empty" id="emptyHist" style="display:none;">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    <p>Nenhum check-in no período.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -152,26 +172,37 @@
             const p = nome.trim().split(/\s+/);
             return ((p[0]?.[0] || '') + (p[1]?.[0] || '')).toUpperCase();
         }
-
-        function checkinDoServo(servoId) {
-            return checkinsHoje.find(c => c.servo_id === servoId);
+        function checkinDoServo(id) { return checkinsHoje.find(c => c.servo_id === id); }
+        function fmtData(iso) {
+            const [a,m,d] = iso.split('-');
+            return `${d}/${m}/${a}`;
         }
 
-        // ---- Meu check-in (todos os perfis podem marcar o próprio) ----
+        function igrejaFiltro() {
+            const sel = document.getElementById('filtroIgreja');
+            return (sessao.perfil === 'admin' && sel && sel.value) ? sel.value : null;
+        }
+
+        function trocarAba(aba) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === aba));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + aba).classList.add('active');
+            if (aba === 'historico') carregarHistorico();
+        }
+
+        // ---- Meu check-in ----
         function renderMeuCheckin() {
             const card = document.getElementById('meuCheckin');
             card.style.display = 'block';
             document.getElementById('meuNome').textContent = sessao.nome;
-
             const meu = checkinDoServo(sessao.id);
             const btn = document.getElementById('btnMeuCheckin');
             const status = document.getElementById('meuStatus');
-
             if (meu) {
                 status.textContent = `Check-in feito às ${(meu.horario || '').slice(0,5)}. Deus abençoe seu serviço!`;
                 btn.className = 'btn-checkin marcado';
                 btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Presença confirmada — toque para desfazer';
-                btn.onclick = () => desmarcar(meu.id, true);
+                btn.onclick = () => desmarcar(meu.id);
             } else {
                 status.textContent = 'Marque presença que você está servindo hoje.';
                 btn.className = 'btn-checkin marcar';
@@ -183,40 +214,35 @@
         async function marcarMeu() {
             try {
                 await API.marcarCheckin({ servo_id: sessao.id, servo_nome: sessao.nome, igreja: sessao.igreja });
-                await recarregar();
+                await recarregarHoje();
                 feedback('Check-in realizado!', 'success');
             } catch (e) { feedback(e.message, 'error'); }
         }
-
-        async function desmarcar(id, ehMeu) {
+        async function desmarcar(id) {
             if (!confirm('Desfazer este check-in?')) return;
             try {
                 await API.desmarcarCheckin(id);
-                await recarregar();
+                await recarregarHoje();
                 feedback('Check-in desfeito.', 'success');
             } catch (e) { feedback(e.message, 'error'); }
         }
 
-        // ---- Gestão (líder/admin marcam servos) ----
+        // ---- Gestão (líder/admin) ----
         function renderServos() {
-            const area = document.getElementById('areaGestao');
-            area.style.display = 'block';
-
-            // Servos elegíveis = perfil servo (e também lideres, caso sirvam)
+            const filtro = igrejaFiltro();
             const lista = document.getElementById('listaServos');
             const empty = document.getElementById('emptyServos');
 
-            const presentes = checkinsHoje.length;
-            document.getElementById('contador').textContent = `${presentes} presente(s) hoje`;
+            let visiveis = servos;
+            if (filtro) visiveis = servos.filter(s => s.igreja === filtro);
 
-            if (servos.length === 0) {
-                lista.innerHTML = '';
-                empty.style.display = 'block';
-                return;
+            document.getElementById('contador').textContent = `${checkinsHoje.length} presente(s)`;
+
+            if (visiveis.length === 0) {
+                lista.innerHTML = ''; empty.style.display = 'block'; return;
             }
             empty.style.display = 'none';
-
-            lista.innerHTML = servos.map(s => {
+            lista.innerHTML = visiveis.map(s => {
                 const c = checkinDoServo(s.id);
                 const presente = !!c;
                 return `
@@ -226,8 +252,7 @@
                             <div class="nome">${s.nome}</div>
                             <div class="detalhe">${s.igreja || '—'}${presente ? ' · ✓ ' + (c.horario||'').slice(0,5) : ''}</div>
                         </div>
-                        <button class="btn-toggle ${presente ? 'presente' : 'marcar'}"
-                            onclick="toggleServo('${s.id}')">
+                        <button class="btn-toggle ${presente ? 'presente' : 'marcar'}" onclick="toggleServo('${s.id}')">
                             ${presente ? 'Presente' : 'Marcar'}
                         </button>
                     </div>`;
@@ -238,40 +263,95 @@
             const servo = servos.find(s => s.id === servoId);
             const c = checkinDoServo(servoId);
             try {
-                if (c) {
-                    await API.desmarcarCheckin(c.id);
-                } else {
-                    await API.marcarCheckin({ servo_id: servo.id, servo_nome: servo.nome, igreja: servo.igreja });
-                }
-                await recarregar();
+                if (c) await API.desmarcarCheckin(c.id);
+                else await API.marcarCheckin({ servo_id: servo.id, servo_nome: servo.nome, igreja: servo.igreja });
+                await recarregarHoje();
             } catch (e) { feedback(e.message, 'error'); }
         }
 
-        async function recarregar() {
-            checkinsHoje = await API.listarCheckins();
+        async function recarregarHoje() {
+            checkinsHoje = await API.listarCheckins(null, igrejaFiltro());
             renderMeuCheckin();
-            if (sessao.perfil === 'admin' || sessao.perfil === 'lider') {
-                renderServos();
-            }
+            if (sessao.perfil === 'admin' || sessao.perfil === 'lider') renderServos();
+        }
+
+        // ---- Histórico ----
+        async function carregarHistorico() {
+            const inicio = document.getElementById('histInicio').value || null;
+            const fim = document.getElementById('histFim').value || null;
+            let dados = [];
+            try {
+                dados = await API.historicoCheckins({ igreja: igrejaFiltro(), data_inicio: inicio, data_fim: fim });
+            } catch (e) { feedback(e.message, 'error'); return; }
+
+            const cont = document.getElementById('listaHistorico');
+            const empty = document.getElementById('emptyHist');
+            if (dados.length === 0) { cont.innerHTML = ''; empty.style.display = 'block'; return; }
+            empty.style.display = 'none';
+
+            // Agrupa por data
+            const grupos = {};
+            dados.forEach(c => { (grupos[c.data] = grupos[c.data] || []).push(c); });
+
+            cont.innerHTML = Object.keys(grupos).map(data => {
+                const itens = grupos[data];
+                return `
+                    <div class="grupo-data">
+                        <div class="cabecalho">
+                            <span>${fmtData(data)}</span>
+                            <span class="qtd">${itens.length} presente(s)</span>
+                        </div>
+                        <div class="lista">
+                            ${itens.map(c => `
+                                <div class="servo-item presente">
+                                    <div class="avatar">${iniciais(c.servo_nome)}</div>
+                                    <div class="info">
+                                        <div class="nome">${c.servo_nome}</div>
+                                        <div class="detalhe">${c.igreja} · ${(c.horario||'').slice(0,5)}</div>
+                                    </div>
+                                </div>`).join('')}
+                        </div>
+                    </div>`;
+            }).join('');
         }
 
         (async function init() {
             sessao = await protegerPagina(['admin', 'lider', 'servo']);
             if (!sessao) return;
 
-            // Data de hoje formatada
             const hoje = new Date();
             document.getElementById('dataHoje').textContent =
                 hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
 
-            try {
-                if (sessao.perfil === 'admin' || sessao.perfil === 'lider') {
-                    servos = await API.listarServos();
+            if (sessao.perfil === 'admin' || sessao.perfil === 'lider') {
+                document.getElementById('areaGestao').style.display = 'block';
+                try { servos = await API.listarServos(); } catch (e) { feedback(e.message, 'error'); }
+
+                // Filtro de igreja só para admin
+                if (sessao.perfil === 'admin') {
+                    const box = document.getElementById('filtroIgrejaBox');
+                    box.style.display = 'block';
+                    try {
+                        const igrejas = await API.listarIgrejas();
+                        const sel = document.getElementById('filtroIgreja');
+                        igrejas.forEach(ig => {
+                            const o = document.createElement('option');
+                            o.value = ig.nome; o.textContent = ig.nome;
+                            sel.appendChild(o);
+                        });
+                        sel.addEventListener('change', async () => {
+                            await recarregarHoje();
+                            if (document.querySelector('.tab.active')?.dataset.tab === 'historico') carregarHistorico();
+                        });
+                    } catch (e) { /* silencioso */ }
                 }
-                await recarregar();
-            } catch (e) {
-                feedback(e.message, 'error');
             }
+
+            // Filtros de data do histórico
+            document.getElementById('histInicio').addEventListener('change', carregarHistorico);
+            document.getElementById('histFim').addEventListener('change', carregarHistorico);
+
+            await recarregarHoje();
         })();
     </script>
 

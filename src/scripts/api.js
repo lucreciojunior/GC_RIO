@@ -101,10 +101,18 @@ const API = {
 
     // Cria usuário no Auth + perfil (via metadados no cadastro).
     // O login é por nome de usuário; guardamos nome@rio.local no Auth.
-    // Para uso interno, desative "Confirm email" em Auth > Providers.
+    // Usa um client TEMPORÁRIO e isolado para o signUp não derrubar a
+    // sessão do admin que está cadastrando (senão o Supabase loga no novo user).
     async criarUsuario({ usuario, senha, nome, perfil, igreja, data_nascimento }) {
         const login = String(usuario).trim().toLowerCase().replace(/\s+/g, "");
-        const { data, error } = await _sb.auth.signUp({
+
+        const tempClient = window.supabase.createClient(
+            SUPABASE_CONFIG.url,
+            SUPABASE_CONFIG.anonKey,
+            { auth: { persistSession: false, autoRefreshToken: false } }
+        );
+
+        const { data, error } = await tempClient.auth.signUp({
             email: usuarioParaEmail(login),
             password: senha,
             options: {
@@ -218,16 +226,25 @@ const API = {
         return data;
     },
 
-    // Lista check-ins de uma data (padrão: hoje)
-    async listarCheckins(data = null) {
+    // Lista check-ins de uma data (padrão: hoje), com filtro opcional de igreja
+    async listarCheckins(data = null, igreja = null) {
         const dia = data || new Date().toISOString().slice(0, 10);
-        const { data: rows, error } = await _sb
-            .from("checkins")
-            .select("*")
-            .eq("data", dia)
-            .order("horario");
+        let q = _sb.from("checkins").select("*").eq("data", dia).order("horario");
+        if (igreja) q = q.eq("igreja", igreja);
+        const { data: rows, error } = await q;
         if (error) throw new Error(error.message);
         return rows;
+    },
+
+    // Histórico: agrupa check-ins por data (com filtros opcionais)
+    async historicoCheckins({ igreja = null, data_inicio = null, data_fim = null } = {}) {
+        let q = _sb.from("checkins").select("*").order("data", { ascending: false }).order("horario");
+        if (igreja) q = q.eq("igreja", igreja);
+        if (data_inicio) q = q.gte("data", data_inicio);
+        if (data_fim) q = q.lte("data", data_fim);
+        const { data, error } = await q;
+        if (error) throw new Error(error.message);
+        return data;
     },
 
     // Marca check-in (próprio ou de outro servo, conforme permissão do RLS)

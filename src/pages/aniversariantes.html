@@ -10,22 +10,23 @@
     <style>
         body { background-color: var(--cinza-fundo); min-height: 100vh; }
 
-        .filtro-mes {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
+        /* Navegação de mês (calendário) */
+        .mes-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--branco); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 8px; margin-bottom: 18px;
+            box-shadow: var(--shadow-sm);
         }
-        .filtro-mes select {
-            flex: 1;
-            min-width: 160px;
-            padding: 12px 14px;
-            border: 1.5px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: 'Inter', sans-serif;
-            background: var(--branco);
+        .mes-nav button {
+            width: 44px; height: 44px; border-radius: 10px; border: none;
+            background: var(--verde-suave); color: var(--verde-medio);
+            font-size: 1rem; cursor: pointer; flex-shrink: 0;
+        }
+        .mes-nav button:active { background: var(--verde-claro); color: #fff; }
+        .mes-nav .mes-atual { font-weight: 700; color: var(--verde-escuro); font-size: 1.05rem; text-align: center; flex: 1; }
+        .mes-nav .btn-hoje {
+            width: auto; padding: 0 14px; font-size: 0.78rem; font-weight: 600;
+            background: none; color: var(--texto-muted); height: 44px;
         }
 
         .destaque-hoje {
@@ -97,8 +98,15 @@
     <div class="rio-container">
         <div class="feedback" id="feedback"></div>
 
-        <div class="filtro-mes">
-            <select id="filtroMes"></select>
+        <div class="mes-nav">
+            <button id="btnAnterior" title="Mês anterior"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="mes-atual" id="mesAtual">—</div>
+            <button id="btnProximo" title="Próximo mês"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div style="text-align:center; margin-bottom:16px;">
+            <button class="btn-hoje" id="btnHoje" style="border:1px solid var(--border-color); background:#fff; border-radius:999px; padding:8px 18px; font-size:0.8rem; font-weight:600; color:var(--verde-medio); cursor:pointer;">
+                <i class="fa-solid fa-calendar-day"></i> Mês atual
+            </button>
         </div>
 
         <div class="destaque-hoje" id="destaqueHoje">
@@ -120,6 +128,7 @@
     <script>
         const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
         let todos = [];
+        let mesSel = new Date().getMonth(); // 0-11
 
         function mostrarErro(msg) {
             const el = document.getElementById('feedback');
@@ -133,12 +142,12 @@
         }
 
         function render() {
-            const mesSel = parseInt(document.getElementById('filtroMes').value);
+            document.getElementById('mesAtual').textContent = MESES[mesSel];
+
             const hoje = new Date();
             const hojeDia = hoje.getDate();
-            const hojeMes = hoje.getMonth(); // 0-11
+            const hojeMes = hoje.getMonth();
 
-            // Filtra por mês selecionado (data_nascimento é "aaaa-mm-dd")
             const doMes = todos
                 .map(p => {
                     const [ano, mes, dia] = p.data_nascimento.split('-').map(Number);
@@ -172,7 +181,6 @@
                 }).join('');
             }
 
-            // Destaque de hoje
             const hojeLista = doMes.filter(p => p._mes === hojeMes && p._dia === hojeDia);
             const destaque = document.getElementById('destaqueHoje');
             if (mesSel === hojeMes && hojeLista.length > 0) {
@@ -183,15 +191,21 @@
             }
         }
 
+        function mudarMes(delta) {
+            mesSel = (mesSel + delta + 12) % 12;
+            render();
+        }
+
         (async function init() {
             const sessao = await protegerPagina(['admin', 'lider']);
             if (!sessao) return;
 
-            // Monta seletor de meses (mês atual selecionado)
-            const sel = document.getElementById('filtroMes');
-            const mesAtual = new Date().getMonth();
-            sel.innerHTML = MESES.map((m, i) => `<option value="${i}" ${i === mesAtual ? 'selected' : ''}>${m}</option>`).join('');
-            sel.addEventListener('change', render);
+            document.getElementById('btnAnterior').addEventListener('click', () => mudarMes(-1));
+            document.getElementById('btnProximo').addEventListener('click', () => mudarMes(1));
+            document.getElementById('btnHoje').addEventListener('click', () => {
+                mesSel = new Date().getMonth();
+                render();
+            });
 
             try {
                 todos = await API.listarAniversariantes();
