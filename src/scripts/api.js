@@ -102,13 +102,13 @@ const API = {
     // Cria usuário no Auth + perfil (via metadados no cadastro).
     // O login é por nome de usuário; guardamos nome@rio.local no Auth.
     // Para uso interno, desative "Confirm email" em Auth > Providers.
-    async criarUsuario({ usuario, senha, nome, perfil, igreja }) {
+    async criarUsuario({ usuario, senha, nome, perfil, igreja, data_nascimento }) {
         const login = String(usuario).trim().toLowerCase().replace(/\s+/g, "");
         const { data, error } = await _sb.auth.signUp({
             email: usuarioParaEmail(login),
             password: senha,
             options: {
-                data: { nome, usuario: login, perfil, igreja },
+                data: { nome, usuario: login, perfil, igreja, data_nascimento: data_nascimento || "" },
             },
         });
         if (error) {
@@ -193,6 +193,69 @@ const API = {
         const { data, error } = await q;
         if (error) throw new Error(error.message);
         return data;
+    },
+
+    // ---- Aniversariantes ----
+    // Retorna os perfis com data de nascimento (RLS já filtra por igreja/perfil)
+    async listarAniversariantes() {
+        const { data, error } = await _sb
+            .from("perfis")
+            .select("id, nome, usuario, igreja, data_nascimento")
+            .not("data_nascimento", "is", null)
+            .order("nome");
+        if (error) throw new Error(error.message);
+        return data;
+    },
+
+    // ---- Check-in ----
+    // Lista os servos visíveis (RLS filtra por igreja p/ líder, tudo p/ admin)
+    async listarServos() {
+        const { data, error } = await _sb
+            .from("perfis")
+            .select("id, nome, usuario, perfil, igreja")
+            .order("nome");
+        if (error) throw new Error(error.message);
+        return data;
+    },
+
+    // Lista check-ins de uma data (padrão: hoje)
+    async listarCheckins(data = null) {
+        const dia = data || new Date().toISOString().slice(0, 10);
+        const { data: rows, error } = await _sb
+            .from("checkins")
+            .select("*")
+            .eq("data", dia)
+            .order("horario");
+        if (error) throw new Error(error.message);
+        return rows;
+    },
+
+    // Marca check-in (próprio ou de outro servo, conforme permissão do RLS)
+    async marcarCheckin({ servo_id, servo_nome, igreja, data = null }) {
+        const { data: { user } } = await _sb.auth.getUser();
+        const registro = {
+            servo_id,
+            servo_nome,
+            igreja,
+            marcado_por: user ? user.id : null,
+        };
+        if (data) registro.data = data;
+        const { data: row, error } = await _sb
+            .from("checkins")
+            .insert(registro)
+            .select()
+            .single();
+        if (error) {
+            if (error.code === "23505") throw new Error("Este servo já tem check-in hoje.");
+            throw new Error(error.message);
+        }
+        return row;
+    },
+
+    // Desmarca (remove) um check-in
+    async desmarcarCheckin(id) {
+        const { error } = await _sb.from("checkins").delete().eq("id", id);
+        if (error) throw new Error(error.message);
     },
 };
 

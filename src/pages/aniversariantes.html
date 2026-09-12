@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aniversariantes - Igreja RIO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        body { background-color: var(--cinza-fundo); min-height: 100vh; }
+
+        .filtro-mes {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .filtro-mes select {
+            flex: 1;
+            min-width: 160px;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            background: var(--branco);
+        }
+
+        .destaque-hoje {
+            background: linear-gradient(135deg, #e91e63, #ff6090);
+            color: #fff;
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 18px;
+            display: none;
+            box-shadow: 0 8px 24px rgba(233,30,99,0.25);
+        }
+        .destaque-hoje.show { display: block; }
+        .destaque-hoje h3 { color: #fff; font-size: 1rem; margin-bottom: 8px; }
+        .destaque-hoje .nomes { font-size: 1.1rem; font-weight: 700; }
+
+        .lista { display: flex; flex-direction: column; gap: 10px; }
+
+        .aniversariante {
+            background: var(--branco);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+        .aniversariante .avatar {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--verde-medio), var(--verde-claro));
+            color: #fff; font-weight: 700; font-size: 1.05rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .aniversariante .info { flex: 1; min-width: 0; }
+        .aniversariante .nome { font-weight: 600; color: var(--verde-escuro); }
+        .aniversariante .detalhe { font-size: 0.82rem; color: var(--texto-muted); }
+        .aniversariante .dia {
+            text-align: center; flex-shrink: 0;
+            background: var(--verde-suave); border-radius: 12px;
+            padding: 8px 12px; min-width: 54px;
+        }
+        .aniversariante .dia .num { font-size: 1.3rem; font-weight: 800; color: var(--verde-medio); line-height: 1; }
+        .aniversariante .dia .mes { font-size: 0.68rem; text-transform: uppercase; color: var(--texto-muted); letter-spacing: 0.5px; }
+        .aniversariante.eh-hoje { border-color: #e91e63; background: #fff0f5; }
+
+        .empty { text-align: center; padding: 50px 20px; color: var(--texto-muted); }
+        .empty i { font-size: 2.5rem; opacity: 0.35; margin-bottom: 12px; display: block; }
+
+        .feedback {
+            padding: 12px 16px; border-radius: 10px; font-size: 0.85rem;
+            margin-bottom: 16px; display: none; background: var(--danger-light); color: var(--danger);
+        }
+        .feedback.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="rio-topbar">
+        <div class="rio-topbar-left">
+            <a href="home.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="topbar-title"><i class="fa-solid fa-cake-candles"></i> Aniversariantes</div>
+        </div>
+        <div class="rio-topbar-right">
+            <a href="home.html" class="btn-home"><i class="fa-solid fa-house"></i> <span>Início</span></a>
+        </div>
+    </div>
+
+    <div class="rio-container">
+        <div class="feedback" id="feedback"></div>
+
+        <div class="filtro-mes">
+            <select id="filtroMes"></select>
+        </div>
+
+        <div class="destaque-hoje" id="destaqueHoje">
+            <h3>🎉 Aniversariante(s) de hoje!</h3>
+            <div class="nomes" id="nomesHoje"></div>
+        </div>
+
+        <div class="lista" id="lista"></div>
+
+        <div class="empty" id="empty" style="display:none;">
+            <i class="fa-solid fa-cake-candles"></i>
+            <p>Nenhum aniversariante neste mês.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/config.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script>
+        const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        let todos = [];
+
+        function mostrarErro(msg) {
+            const el = document.getElementById('feedback');
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        function iniciais(nome) {
+            const p = nome.trim().split(/\s+/);
+            return ((p[0]?.[0] || '') + (p[1]?.[0] || '')).toUpperCase();
+        }
+
+        function render() {
+            const mesSel = parseInt(document.getElementById('filtroMes').value);
+            const hoje = new Date();
+            const hojeDia = hoje.getDate();
+            const hojeMes = hoje.getMonth(); // 0-11
+
+            // Filtra por mês selecionado (data_nascimento é "aaaa-mm-dd")
+            const doMes = todos
+                .map(p => {
+                    const [ano, mes, dia] = p.data_nascimento.split('-').map(Number);
+                    return { ...p, _dia: dia, _mes: mes - 1 };
+                })
+                .filter(p => p._mes === mesSel)
+                .sort((a, b) => a._dia - b._dia);
+
+            const lista = document.getElementById('lista');
+            const empty = document.getElementById('empty');
+
+            if (doMes.length === 0) {
+                lista.innerHTML = '';
+                empty.style.display = 'block';
+            } else {
+                empty.style.display = 'none';
+                lista.innerHTML = doMes.map(p => {
+                    const ehHoje = (p._mes === hojeMes && p._dia === hojeDia);
+                    return `
+                        <div class="aniversariante ${ehHoje ? 'eh-hoje' : ''}">
+                            <div class="avatar">${iniciais(p.nome)}</div>
+                            <div class="info">
+                                <div class="nome">${p.nome} ${ehHoje ? '🎂' : ''}</div>
+                                <div class="detalhe">${p.igreja || '—'}</div>
+                            </div>
+                            <div class="dia">
+                                <div class="num">${String(p._dia).padStart(2,'0')}</div>
+                                <div class="mes">${MESES[p._mes].slice(0,3)}</div>
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+
+            // Destaque de hoje
+            const hojeLista = doMes.filter(p => p._mes === hojeMes && p._dia === hojeDia);
+            const destaque = document.getElementById('destaqueHoje');
+            if (mesSel === hojeMes && hojeLista.length > 0) {
+                document.getElementById('nomesHoje').textContent = hojeLista.map(p => p.nome).join(', ');
+                destaque.classList.add('show');
+            } else {
+                destaque.classList.remove('show');
+            }
+        }
+
+        (async function init() {
+            const sessao = await protegerPagina(['admin', 'lider']);
+            if (!sessao) return;
+
+            // Monta seletor de meses (mês atual selecionado)
+            const sel = document.getElementById('filtroMes');
+            const mesAtual = new Date().getMonth();
+            sel.innerHTML = MESES.map((m, i) => `<option value="${i}" ${i === mesAtual ? 'selected' : ''}>${m}</option>`).join('');
+            sel.addEventListener('change', render);
+
+            try {
+                todos = await API.listarAniversariantes();
+            } catch (erro) {
+                mostrarErro(erro.message);
+                return;
+            }
+            render();
+        })();
+    </script>
+
+</body>
+</html>

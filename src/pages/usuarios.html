@@ -401,6 +401,10 @@
                                 <option value="">Selecione...</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="novoNascimento">Data de Nascimento (opcional)</label>
+                            <input type="date" id="novoNascimento">
+                        </div>
                     </div>
                     <button type="submit" class="btn-cadastrar">
                         <i class="fa-solid fa-plus"></i> Cadastrar Usuário
@@ -504,6 +508,7 @@
                 senha: document.getElementById('novaSenha').value,
                 perfil: document.getElementById('novoPerfil').value,
                 igreja: document.getElementById('novoIgreja').value || null,
+                data_nascimento: document.getElementById('novoNascimento').value || null,
             };
 
             try {
