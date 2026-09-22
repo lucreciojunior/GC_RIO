@@ -338,10 +338,11 @@ async function protegerPagina(perfisPermitidos = null) {
         return null;
     }
 
-    let perfil = getSessao();
-    if (!perfil) {
-        perfil = await carregarPerfil();
-    }
+    // Sempre recarrega o perfil do servidor (evita cache de sessão desatualizado).
+    // Se falhar, cai para o cache local como fallback.
+    let perfil = await carregarPerfil();
+    if (!perfil) perfil = getSessao();
+
     if (!perfil) {
         window.location.href = "login.html";
         return null;
