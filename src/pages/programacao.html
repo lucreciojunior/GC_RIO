@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programação - Igreja RIO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        body { background-color: var(--cinza-fundo); min-height: 100vh; }
+        .wrap { max-width: 780px; margin: 0 auto; padding: 16px 14px calc(24px + env(safe-area-inset-bottom,0)); }
+
+        /* Abas principais */
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #fff; padding: 6px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .tab { flex: 1; text-align: center; padding: 11px; border-radius: 9px; font-size: 0.9rem; font-weight: 600; color: var(--texto-muted); cursor: pointer; border: none; background: none; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; gap: 7px; }
+        .tab.active { background: var(--verde-escuro); color: #fff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Filtro + ações */
+        .barra { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: flex-end; }
+        .barra .campo { flex: 1; min-width: 150px; display: flex; flex-direction: column; gap: 5px; }
+        .barra label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--texto-muted); }
+        .barra select { padding: 11px 12px; border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 16px; font-family: 'Inter', sans-serif; background: #fff; }
+        .btn-add { background: linear-gradient(135deg, var(--verde-escuro), var(--verde-medio)); color: #fff; border: none; border-radius: 10px; padding: 12px 18px; font-weight: 600; font-size: 0.85rem; cursor: pointer; font-family: 'Inter', sans-serif; min-height: 46px; display: flex; align-items: center; gap: 7px; }
+
+        .serie-badge { background: var(--verde-suave); color: var(--verde-medio); border-radius: 12px; padding: 10px 14px; font-size: 0.85rem; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+        /* Cards de pregação */
+        .lista { display: flex; flex-direction: column; gap: 12px; }
+        .preg-card { background: var(--branco); border: 1px solid var(--border-color); border-radius: 14px; padding: 15px; box-shadow: var(--shadow-sm); }
+        .preg-card.passado { opacity: 0.6; }
+        .preg-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .preg-data { display: flex; align-items: center; gap: 10px; }
+        .preg-data .dia { text-align: center; background: var(--verde-suave); border-radius: 10px; padding: 6px 10px; min-width: 50px; }
+        .preg-data .dia .n { font-size: 1.15rem; font-weight: 800; color: var(--verde-medio); line-height: 1; }
+        .preg-data .dia .m { font-size: 0.62rem; text-transform: uppercase; color: var(--texto-muted); }
+        .preg-texto { font-weight: 700; color: var(--verde-escuro); font-size: 0.95rem; }
+        .preg-tema { font-size: 0.82rem; color: var(--texto-muted); font-style: italic; }
+        .preg-acoes { display: flex; gap: 6px; }
+        .btn-i { width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8rem; }
+        .btn-i.edit { background: #e3f2fd; color: #1565c0; }
+        .btn-i.del { background: var(--danger-light); color: var(--danger); }
+        .escalas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .escala-tag { background: #f0f4f1; border: 1px solid var(--verde-claro); border-radius: 999px; padding: 5px 12px; font-size: 0.8rem; color: var(--verde-escuro); }
+        .escala-tag b { color: var(--verde-medio); }
+
+        /* Cards de aviso */
+        .aviso-card { background: var(--branco); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); }
+        .aviso-card .dia { text-align: center; background: var(--verde-suave); border-radius: 10px; padding: 6px 10px; min-width: 50px; flex-shrink: 0; }
+        .aviso-card .dia .n { font-size: 1.15rem; font-weight: 800; color: var(--verde-medio); line-height: 1; }
+        .aviso-card .dia .m { font-size: 0.62rem; text-transform: uppercase; color: var(--texto-muted); }
+        .aviso-card .info { flex: 1; min-width: 0; }
+        .aviso-card .resp { font-weight: 600; color: var(--verde-escuro); }
+        .aviso-card .desc { font-size: 0.82rem; color: var(--texto-muted); }
+
+        .vazio { text-align: center; padding: 44px 20px; color: var(--texto-muted); }
+        .vazio i { font-size: 2.4rem; opacity: 0.35; margin-bottom: 10px; display: block; }
+
+        .feedback { padding: 12px 16px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+        .feedback.show { display: flex; align-items: center; gap: 8px; }
+        .feedback.success { background: var(--verde-suave); color: var(--verde-medio); }
+        .feedback.error { background: var(--danger-light); color: var(--danger); }
+
+        /* Modal */
+        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+        .modal-ov.active { display: flex; }
+        .modal { background: #fff; border-radius: 16px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .modal-head { background: var(--verde-escuro); color: #fff; padding: 16px 20px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-head h3 { color: #fff; font-size: 1rem; }
+        .modal-head button { background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; }
+        .modal-body { padding: 20px; }
+        .fg { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+        .fg label { font-size: 0.82rem; font-weight: 600; color: var(--verde-escuro); }
+        .fg input, .fg select { padding: 12px 14px; border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 16px; font-family: 'Inter', sans-serif; background: #fafbfa; }
+        .escala-linha { display: flex; gap: 8px; margin-bottom: 8px; }
+        .escala-linha input { flex: 1; }
+        .escala-linha .rm { background: var(--danger-light); color: var(--danger); border: none; border-radius: 8px; width: 44px; cursor: pointer; }
+        .btn-add-escala { background: var(--verde-suave); color: var(--verde-medio); border: none; border-radius: 8px; padding: 10px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; width: 100%; }
+        .modal-acoes { display: flex; gap: 10px; margin-top: 8px; }
+        .modal-acoes button { flex: 1; padding: 13px; border-radius: 10px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; border: none; min-height: 48px; }
+        .btn-cancel { background: #f0f0f0; color: var(--texto); }
+        .btn-salvar { background: linear-gradient(135deg, var(--verde-escuro), var(--verde-medio)); color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="rio-topbar">
+        <div class="rio-topbar-left">
+            <a href="home.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+            <div class="topbar-title"><i class="fa-solid fa-calendar-days"></i> Programação</div>
+        </div>
+        <div class="rio-topbar-right">
+            <a href="home.html" class="btn-home"><i class="fa-solid fa-house"></i> <span>Início</span></a>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <div class="feedback" id="feedback"></div>
+
+        <!-- Abas -->
+        <div class="tabs">
+            <button class="tab active" data-tab="pregacao" onclick="trocarAba('pregacao')"><i class="fa-solid fa-book-bible"></i> Pregação</button>
+            <button class="tab" data-tab="avisos" onclick="trocarAba('avisos')"><i class="fa-solid fa-bullhorn"></i> Avisos</button>
+        </div>
+
+        <!-- Filtro de igreja (comum às abas) -->
+        <div class="barra">
+            <div class="campo" id="campoIgreja">
+                <label>Igreja</label>
+                <select id="fIgreja"></select>
+            </div>
+            <button class="btn-add" id="btnAdd"><i class="fa-solid fa-plus"></i> <span id="btnAddTxt">Nova pregação</span></button>
+        </div>
+
+        <!-- ABA PREGAÇÃO -->
+        <div class="tab-content active" id="tab-pregacao">
+            <div class="serie-badge" id="serieBadge" style="display:none;"><i class="fa-solid fa-bookmark"></i> <span id="serieNome"></span></div>
+            <div class="lista" id="listaPregacoes"></div>
+            <div class="vazio" id="vazioPreg" style="display:none;">
+                <i class="fa-solid fa-book-bible"></i>
+                <p>Nenhuma pregação cadastrada.</p>
+            </div>
+        </div>
+
+        <!-- ABA AVISOS -->
+        <div class="tab-content" id="tab-avisos">
+            <div class="lista" id="listaAvisos"></div>
+            <div class="vazio" id="vazioAvisos" style="display:none;">
+                <i class="fa-solid fa-bullhorn"></i>
+                <p>Nenhum aviso cadastrado.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pregação -->
+    <div class="modal-ov" id="modalPreg">
+        <div class="modal">
+            <div class="modal-head"><h3 id="tituloPreg">Nova pregação</h3><button onclick="fecharModais()">&times;</button></div>
+            <div class="modal-body">
+                <input type="hidden" id="pregId">
+                <div class="fg"><label>Igreja</label><select id="pIgreja"></select></div>
+                <div class="fg"><label>Data</label><input type="date" id="pData" required></div>
+                <div class="fg"><label>Texto bíblico</label><input type="text" id="pTexto" placeholder="Ex: Fp 1:1-11"></div>
+                <div class="fg"><label>Tema</label><input type="text" id="pTema" placeholder="Ex: Alegria nas Relações"></div>
+                <div class="fg"><label>Série</label><input type="text" id="pSerie" placeholder="Ex: Filipenses — Jornada de Alegria"></div>
+                <label style="font-size:0.82rem; font-weight:600; color:var(--verde-escuro);">Horários e pregadores</label>
+                <div id="escalasBox" style="margin-top:8px;"></div>
+                <button type="button" class="btn-add-escala" onclick="addLinhaEscala()"><i class="fa-solid fa-plus"></i> Adicionar horário</button>
+                <div class="modal-acoes" style="margin-top:16px;">
+                    <button class="btn-cancel" onclick="fecharModais()">Cancelar</button>
+                    <button class="btn-salvar" onclick="salvarPregacao()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Aviso -->
+    <div class="modal-ov" id="modalAviso">
+        <div class="modal">
+            <div class="modal-head"><h3 id="tituloAviso">Novo aviso</h3><button onclick="fecharModais()">&times;</button></div>
+            <div class="modal-body">
+                <input type="hidden" id="avisoId">
+                <div class="fg"><label>Igreja</label><select id="aIgreja"></select></div>
+                <div class="fg"><label>Data</label><input type="date" id="aData" required></div>
+                <div class="fg"><label>Responsável</label><input type="text" id="aResp" placeholder="Ex: Rafa"></div>
+                <div class="fg"><label>Descrição (opcional)</label><input type="text" id="aDesc" placeholder="Detalhes do aviso"></div>
+                <div class="modal-acoes" style="margin-top:8px;">
+                    <button class="btn-cancel" onclick="fecharModais()">Cancelar</button>
+                    <button class="btn-salvar" onclick="salvarAviso()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../scripts/config.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script>
+        let sessao = null;
+        let abaAtual = 'pregacao';
+        let igrejasDisp = [];
+        const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
+        function feedback(msg, tipo) {
+            const el = document.getElementById('feedback');
+            el.className = `feedback show ${tipo}`;
+            el.innerHTML = `<i class="fa-solid fa-${tipo==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
+            setTimeout(() => { el.className = 'feedback'; }, 4000);
+        }
+        function diaMes(iso) { const [a,m,d] = iso.split('-'); return { dia: d, mes: MESES[parseInt(m)-1] }; }
+        function ehPassado(iso) { return iso < new Date().toISOString().slice(0,10); }
+
+        function trocarAba(aba) {
+            abaAtual = aba;
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === aba));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + aba).classList.add('active');
+            document.getElementById('btnAddTxt').textContent = aba === 'pregacao' ? 'Nova pregação' : 'Novo aviso';
+            carregar();
+        }
+
+        // ---- Carregar dados ----
+        async function carregar() {
+            const igreja = document.getElementById('fIgreja').value || null;
+            if (abaAtual === 'pregacao') await carregarPregacoes(igreja);
+            else await carregarAvisos(igreja);
+        }
+
+        async function carregarPregacoes(igreja) {
+            let dados = [];
+            try { dados = await API.listarPregacoes(igreja); } catch (e) { feedback(e.message, 'error'); }
+            const lista = document.getElementById('listaPregacoes');
+            const vazio = document.getElementById('vazioPreg');
+            const badge = document.getElementById('serieBadge');
+
+            if (!dados.length) { lista.innerHTML = ''; vazio.style.display = 'block'; badge.style.display = 'none'; return; }
+            vazio.style.display = 'none';
+
+            const serie = dados.find(d => d.serie)?.serie;
+            if (serie) { document.getElementById('serieNome').textContent = serie; badge.style.display = 'flex'; }
+            else badge.style.display = 'none';
+
+            lista.innerHTML = dados.map(p => {
+                const dm = diaMes(p.data);
+                const escalas = (p.escalas || []).map(e => `<span class="escala-tag"><b>${e.horario}</b> ${e.pregador}</span>`).join('');
+                return `
+                    <div class="preg-card ${ehPassado(p.data)?'passado':''}">
+                        <div class="preg-topo">
+                            <div class="preg-data">
+                                <div class="dia"><div class="n">${dm.dia}</div><div class="m">${dm.mes}</div></div>
+                                <div>
+                                    <div class="preg-texto">${p.texto || '—'}</div>
+                                    <div class="preg-tema">${p.tema || ''}</div>
+                                </div>
+                            </div>
+                            <div class="preg-acoes">
+                                <button class="btn-i edit" onclick="editarPregacao(${p.id})"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn-i del" onclick="excluirPregacao(${p.id})"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="escalas">${escalas}</div>
+                    </div>`;
+            }).join('');
+            pregCache = dados;
+        }
+
+        async function carregarAvisos(igreja) {
+            let dados = [];
+            try { dados = await API.listarAvisos(igreja); } catch (e) { feedback(e.message, 'error'); }
+            const lista = document.getElementById('listaAvisos');
+            const vazio = document.getElementById('vazioAvisos');
+            if (!dados.length) { lista.innerHTML = ''; vazio.style.display = 'block'; return; }
+            vazio.style.display = 'none';
+            lista.innerHTML = dados.map(a => {
+                const dm = diaMes(a.data);
+                return `
+                    <div class="aviso-card ${ehPassado(a.data)?'passado':''}">
+                        <div class="dia"><div class="n">${dm.dia}</div><div class="m">${dm.mes}</div></div>
+                        <div class="info">
+                            <div class="resp">${a.responsavel || '—'}</div>
+                            <div class="desc">${a.descricao || a.igreja}</div>
+                        </div>
+                        <div class="preg-acoes">
+                            <button class="btn-i edit" onclick="editarAviso(${a.id})"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-i del" onclick="excluirAviso(${a.id})"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            }).join('');
+            avisoCache = dados;
+        }
+
+        let pregCache = [], avisoCache = [];
+
+        // ---- Modal Pregação ----
+        function preencherSelectIgrejas(sel, valor) {
+            sel.innerHTML = igrejasDisp.map(ig => `<option value="${ig}">${ig}</option>`).join('');
+            if (valor) sel.value = valor;
+        }
+
+        function addLinhaEscala(horario = '', pregador = '') {
+            const box = document.getElementById('escalasBox');
+            const div = document.createElement('div');
+            div.className = 'escala-linha';
+            div.innerHTML = `
+                <input type="text" placeholder="Horário (ex: 09h)" value="${horario}" style="max-width:110px; padding:11px; border:1.5px solid var(--border-color); border-radius:10px; font-size:16px;">
+                <input type="text" placeholder="Pregador" value="${pregador}" style="padding:11px; border:1.5px solid var(--border-color); border-radius:10px; font-size:16px;">
+                <button type="button" class="rm" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>`;
+            box.appendChild(div);
+        }
+
+        function abrirNovaPregacao() {
+            document.getElementById('pregId').value = '';
+            document.getElementById('tituloPreg').textContent = 'Nova pregação';
+            preencherSelectIgrejas(document.getElementById('pIgreja'), document.getElementById('fIgreja').value);
+            document.getElementById('pData').value = '';
+            document.getElementById('pTexto').value = '';
+            document.getElementById('pTema').value = '';
+            document.getElementById('pSerie').value = pregCache.find(p=>p.serie)?.serie || '';
+            document.getElementById('escalasBox').innerHTML = '';
+            addLinhaEscala();
+            document.getElementById('modalPreg').classList.add('active');
+        }
+
+        function editarPregacao(id) {
+            const p = pregCache.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('pregId').value = id;
+            document.getElementById('tituloPreg').textContent = 'Editar pregação';
+            preencherSelectIgrejas(document.getElementById('pIgreja'), p.igreja);
+            document.getElementById('pData').value = p.data;
+            document.getElementById('pTexto').value = p.texto || '';
+            document.getElementById('pTema').value = p.tema || '';
+            document.getElementById('pSerie').value = p.serie || '';
+            document.getElementById('escalasBox').innerHTML = '';
+            (p.escalas || []).forEach(e => addLinhaEscala(e.horario, e.pregador));
+            if (!(p.escalas||[]).length) addLinhaEscala();
+            document.getElementById('modalPreg').classList.add('active');
+        }
+
+        async function salvarPregacao() {
+            const escalas = [];
+            document.querySelectorAll('#escalasBox .escala-linha').forEach(l => {
+                const ins = l.querySelectorAll('input');
+                const h = ins[0].value.trim(), pr = ins[1].value.trim();
+                if (h || pr) escalas.push({ horario: h, pregador: pr });
+            });
+            const dados = {
+                igreja: document.getElementById('pIgreja').value,
+                data: document.getElementById('pData').value,
+                texto: document.getElementById('pTexto').value.trim() || null,
+                tema: document.getElementById('pTema').value.trim() || null,
+                serie: document.getElementById('pSerie').value.trim() || null,
+                escalas,
+            };
+            if (!dados.data) { feedback('Informe a data.', 'error'); return; }
+            const id = document.getElementById('pregId').value;
+            try {
+                if (id) await API.atualizarPregacao(parseInt(id), dados);
+                else await API.criarPregacao(dados);
+                fecharModais();
+                feedback('Pregação salva!', 'success');
+                carregar();
+            } catch (e) { feedback(e.message, 'error'); }
+        }
+
+        async function excluirPregacao(id) {
+            const p = pregCache.find(x => x.id === id);
+            if (!confirm(`Excluir a pregação de ${p ? p.data : ''}?`)) return;
+            try { await API.excluirPregacao(id); feedback('Excluída.', 'success'); carregar(); }
+            catch (e) { feedback(e.message, 'error'); }
+        }
+
+        // ---- Modal Aviso ----
+        function abrirNovoAviso() {
+            document.getElementById('avisoId').value = '';
+            document.getElementById('tituloAviso').textContent = 'Novo aviso';
+            preencherSelectIgrejas(document.getElementById('aIgreja'), document.getElementById('fIgreja').value);
+            document.getElementById('aData').value = '';
+            document.getElementById('aResp').value = '';
+            document.getElementById('aDesc').value = '';
+            document.getElementById('modalAviso').classList.add('active');
+        }
+
+        function editarAviso(id) {
+            const a = avisoCache.find(x => x.id === id);
+            if (!a) return;
+            document.getElementById('avisoId').value = id;
+            document.getElementById('tituloAviso').textContent = 'Editar aviso';
+            preencherSelectIgrejas(document.getElementById('aIgreja'), a.igreja);
+            document.getElementById('aData').value = a.data;
+            document.getElementById('aResp').value = a.responsavel || '';
+            document.getElementById('aDesc').value = a.descricao || '';
+            document.getElementById('modalAviso').classList.add('active');
+        }
+
+        async function salvarAviso() {
+            const dados = {
+                igreja: document.getElementById('aIgreja').value,
+                data: document.getElementById('aData').value,
+                responsavel: document.getElementById('aResp').value.trim() || null,
+                descricao: document.getElementById('aDesc').value.trim() || null,
+            };
+            if (!dados.data) { feedback('Informe a data.', 'error'); return; }
+            const id = document.getElementById('avisoId').value;
+            try {
+                if (id) await API.atualizarAviso(parseInt(id), dados);
+                else await API.criarAviso(dados);
+                fecharModais();
+                feedback('Aviso salvo!', 'success');
+                carregar();
+            } catch (e) { feedback(e.message, 'error'); }
+        }
+
+        async function excluirAviso(id) {
+            if (!confirm('Excluir este aviso?')) return;
+            try { await API.excluirAviso(id); feedback('Excluído.', 'success'); carregar(); }
+            catch (e) { feedback(e.message, 'error'); }
+        }
+
+        function fecharModais() {
+            document.getElementById('modalPreg').classList.remove('active');
+            document.getElementById('modalAviso').classList.remove('active');
+        }
+        [document.getElementById('modalPreg'), document.getElementById('modalAviso')].forEach(m => {
+            m.addEventListener('click', e => { if (e.target === m) fecharModais(); });
+        });
+
+        document.getElementById('btnAdd').addEventListener('click', () => {
+            if (abaAtual === 'pregacao') abrirNovaPregacao();
+            else abrirNovoAviso();
+        });
+
+        (async function init() {
+            sessao = await protegerPagina(['admin', 'lider']);
+            if (!sessao) return;
+
+            // Monta lista de igrejas conforme perfil
+            if (sessao.perfil === 'admin') {
+                try {
+                    const igrejas = await API.listarIgrejas();
+                    igrejasDisp = igrejas.map(i => i.nome);
+                } catch (e) { igrejasDisp = []; }
+            } else {
+                // líder: só a própria igreja
+                igrejasDisp = sessao.igreja ? [sessao.igreja] : [];
+            }
+
+            const fSel = document.getElementById('fIgreja');
+            if (sessao.perfil === 'admin') {
+                fSel.innerHTML = '<option value="">Todas</option>' + igrejasDisp.map(ig => `<option value="${ig}">${ig}</option>`).join('');
+            } else {
+                fSel.innerHTML = igrejasDisp.map(ig => `<option value="${ig}">${ig}</option>`).join('');
+                document.getElementById('campoIgreja').style.display = igrejasDisp.length > 1 ? 'flex' : 'none';
+            }
+            fSel.addEventListener('change', carregar);
+
+            carregar();
+        })();
+    </script>
+
+</body>
+</html>

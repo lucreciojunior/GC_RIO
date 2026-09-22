@@ -274,6 +274,52 @@ const API = {
         const { error } = await _sb.from("checkins").delete().eq("id", id);
         if (error) throw new Error(error.message);
     },
+
+    // ---- Pregações ----
+    async listarPregacoes(igreja = null) {
+        let q = _sb.from("pregacoes").select("*").order("data");
+        if (igreja) q = q.eq("igreja", igreja);
+        const { data, error } = await q;
+        if (error) throw new Error(error.message);
+        return data;
+    },
+    async criarPregacao(dados) {
+        const { data, error } = await _sb.from("pregacoes").insert(dados).select().single();
+        if (error) throw new Error(error.message);
+        return data;
+    },
+    async atualizarPregacao(id, dados) {
+        const { data, error } = await _sb.from("pregacoes").update(dados).eq("id", id).select().single();
+        if (error) throw new Error(error.message);
+        return data;
+    },
+    async excluirPregacao(id) {
+        const { error } = await _sb.from("pregacoes").delete().eq("id", id);
+        if (error) throw new Error(error.message);
+    },
+
+    // ---- Avisos ----
+    async listarAvisos(igreja = null) {
+        let q = _sb.from("avisos").select("*").order("data");
+        if (igreja) q = q.eq("igreja", igreja);
+        const { data, error } = await q;
+        if (error) throw new Error(error.message);
+        return data;
+    },
+    async criarAviso(dados) {
+        const { data, error } = await _sb.from("avisos").insert(dados).select().single();
+        if (error) throw new Error(error.message);
+        return data;
+    },
+    async atualizarAviso(id, dados) {
+        const { data, error } = await _sb.from("avisos").update(dados).eq("id", id).select().single();
+        if (error) throw new Error(error.message);
+        return data;
+    },
+    async excluirAviso(id) {
+        const { error } = await _sb.from("avisos").delete().eq("id", id);
+        if (error) throw new Error(error.message);
+    },
 };
 
 // Traduz erros comuns do Postgres para mensagens amigáveis
