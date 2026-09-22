@@ -383,6 +383,10 @@
                             <label for="novoNome">Nome da Igreja</label>
                             <input type="text" id="novoNome" placeholder="Ex: ALDEIA" required>
                         </div>
+                        <div class="form-group">
+                            <label for="novoLider">Líder da Gestão de Culto</label>
+                            <input type="text" id="novoLider" placeholder="Nome do líder">
+                        </div>
                     </div>
                     <button type="submit" class="btn-cadastrar">
                         <i class="fa-solid fa-plus"></i> Cadastrar Igreja
@@ -421,6 +425,10 @@
                         <label for="editNome">Nome da Igreja</label>
                         <input type="text" id="editNome" required>
                     </div>
+                    <div class="form-group">
+                        <label for="editLider">Líder da Gestão de Culto</label>
+                        <input type="text" id="editLider" placeholder="Nome do líder">
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
@@ -454,6 +462,7 @@
 
             const dados = {
                 nome: document.getElementById('novoNome').value.trim().toUpperCase(),
+                lider: document.getElementById('novoLider').value.trim() || null,
             };
 
             try {
@@ -495,6 +504,7 @@
                         <div class="igreja-icon"><i class="fa-solid fa-church"></i></div>
                         <h3>${ig.nome}</h3>
                     </div>
+                    <p><i class="fa-solid fa-user-tie"></i> ${ig.lider ? ig.lider : '<span style="opacity:0.6">Sem líder definido</span>'}</p>
                     <div class="igreja-card-actions">
                         <button class="btn-action btn-edit" onclick="abrirEdicao(${ig.id})">
                             <i class="fa-solid fa-pen"></i> Editar
@@ -528,6 +538,7 @@
 
             document.getElementById('editId').value = id;
             document.getElementById('editNome').value = igreja.nome;
+            document.getElementById('editLider').value = igreja.lider || '';
             document.getElementById('modalEditar').classList.add('active');
         }
 
@@ -536,6 +547,7 @@
             const id = parseInt(document.getElementById('editId').value);
             const dados = {
                 nome: document.getElementById('editNome').value.trim().toUpperCase(),
+                lider: document.getElementById('editLider').value.trim() || null,
             };
 
             try {

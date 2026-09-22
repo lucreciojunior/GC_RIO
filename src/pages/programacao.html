@@ -105,11 +105,23 @@
             <button class="tab" data-tab="avisos" onclick="trocarAba('avisos')"><i class="fa-solid fa-bullhorn"></i> Avisos</button>
         </div>
 
-        <!-- Filtro de igreja (comum às abas) -->
+        <!-- Filtros (comum às abas) -->
         <div class="barra">
             <div class="campo" id="campoIgreja">
                 <label>Igreja</label>
                 <select id="fIgreja"></select>
+            </div>
+            <div class="campo">
+                <label>Exibir</label>
+                <select id="fQuando">
+                    <option value="proximas">Apenas próximas</option>
+                    <option value="todas">Todas</option>
+                    <option value="mes">Por mês</option>
+                </select>
+            </div>
+            <div class="campo" id="campoMes" style="display:none;">
+                <label>Mês</label>
+                <select id="fMes"></select>
             </div>
             <button class="btn-add" id="btnAdd"><i class="fa-solid fa-plus"></i> <span id="btnAddTxt">Nova pregação</span></button>
         </div>
@@ -208,9 +220,40 @@
             else await carregarAvisos(igreja);
         }
 
+        // Filtra uma lista (com campo .data) conforme o seletor de tempo
+        function filtrarPorTempo(lista) {
+            const modo = document.getElementById('fQuando').value;
+            const hoje = new Date().toISOString().slice(0, 10);
+            if (modo === 'proximas') {
+                return lista.filter(x => x.data >= hoje);
+            }
+            if (modo === 'mes') {
+                const mes = document.getElementById('fMes').value; // "aaaa-mm"
+                if (mes) return lista.filter(x => x.data.slice(0, 7) === mes);
+            }
+            return lista; // todas
+        }
+
+        // Monta o seletor de meses a partir das datas disponíveis
+        function montarSeletorMes(lista) {
+            const sel = document.getElementById('fMes');
+            const MES_NOMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            const meses = [...new Set(lista.map(x => x.data.slice(0, 7)))].sort();
+            const atual = sel.value;
+            sel.innerHTML = meses.map(m => {
+                const [a, mm] = m.split('-');
+                return `<option value="${m}">${MES_NOMES[parseInt(mm)-1]}/${a}</option>`;
+            }).join('');
+            if (atual && meses.includes(atual)) sel.value = atual;
+        }
+
         async function carregarPregacoes(igreja) {
             let dados = [];
             try { dados = await API.listarPregacoes(igreja); } catch (e) { feedback(e.message, 'error'); }
+            pregCache = dados;
+            montarSeletorMes(dados);
+            dados = filtrarPorTempo(dados);
+
             const lista = document.getElementById('listaPregacoes');
             const vazio = document.getElementById('vazioPreg');
             const badge = document.getElementById('serieBadge');
@@ -243,12 +286,15 @@
                         <div class="escalas">${escalas}</div>
                     </div>`;
             }).join('');
-            pregCache = dados;
         }
 
         async function carregarAvisos(igreja) {
             let dados = [];
             try { dados = await API.listarAvisos(igreja); } catch (e) { feedback(e.message, 'error'); }
+            avisoCache = dados;
+            montarSeletorMes(dados);
+            dados = filtrarPorTempo(dados);
+
             const lista = document.getElementById('listaAvisos');
             const vazio = document.getElementById('vazioAvisos');
             if (!dados.length) { lista.innerHTML = ''; vazio.style.display = 'block'; return; }
@@ -268,7 +314,6 @@
                         </div>
                     </div>`;
             }).join('');
-            avisoCache = dados;
         }
 
         let pregCache = [], avisoCache = [];
@@ -435,6 +480,14 @@
                 document.getElementById('campoIgreja').style.display = igrejasDisp.length > 1 ? 'flex' : 'none';
             }
             fSel.addEventListener('change', carregar);
+
+            // Filtro de tempo
+            document.getElementById('fQuando').addEventListener('change', () => {
+                const modo = document.getElementById('fQuando').value;
+                document.getElementById('campoMes').style.display = modo === 'mes' ? 'flex' : 'none';
+                carregar();
+            });
+            document.getElementById('fMes').addEventListener('change', carregar);
 
             carregar();
         })();
