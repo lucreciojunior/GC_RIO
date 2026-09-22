@@ -1,10 +1,6 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "redirects": [
-    { "source": "/", "destination": "/login" }
-  ],
   "rewrites": [
+    { "source": "/", "destination": "/src/pages/login.html" },
     { "source": "/login", "destination": "/src/pages/login.html" },
     { "source": "/home", "destination": "/src/pages/home.html" },
     { "source": "/contagem", "destination": "/src/pages/Contagem_Culto_RIO.html" },
