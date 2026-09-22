@@ -211,7 +211,7 @@
     <div class="login-container">
         <div class="logo-section">
             <div class="logo-circle">
-                <img src="../../assets/images/aldeia.PNG" alt="Logo RIO" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=&quot;color:#52b788;font-size:2rem;font-weight:700&quot;>RIO</span>';">
+                <img src="/assets/images/aldeia.PNG" alt="Logo RIO" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=&quot;color:#52b788;font-size:2rem;font-weight:700&quot;>RIO</span>';">
             </div>
             <div class="logo-text">
                 <span><span class="rio">RIO</span></span>
@@ -251,8 +251,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../scripts/config.js?v=3"></script>
-    <script src="../scripts/api.js?v=3"></script>
+    <script src="/src/scripts/config.js?v=4"></script>
+    <script src="/src/scripts/api.js?v=4"></script>
     <script>
         async function fazerLogin(event) {
             event.preventDefault();
@@ -269,7 +269,7 @@
 
             try {
                 await API.login(usuario, senha);
-                window.location.href = 'home.html';
+                window.location.href = '/home';
             } catch (erro) {
                 errorMsg.textContent = erro.message || 'Usuário ou senha incorretos.';
                 errorMsg.style.display = 'block';
@@ -284,7 +284,7 @@
         (async function () {
             const { data: { session } } = await _sb.auth.getSession();
             if (session) {
-                window.location.href = 'home.html';
+                window.location.href = '/home';
             }
         })();
     </script>

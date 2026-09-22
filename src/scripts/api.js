@@ -86,7 +86,7 @@ const API = {
     async logout() {
         await _sb.auth.signOut();
         limparPerfilLocal();
-        window.location.href = "login.html";
+        window.location.href = "/login";
     },
 
     // ---- Usuários (perfis) ----
@@ -334,7 +334,7 @@ function traduzErro(error) {
 async function protegerPagina(perfisPermitidos = null) {
     const { data: { session } } = await _sb.auth.getSession();
     if (!session) {
-        window.location.href = "login.html";
+        window.location.href = "/login";
         return null;
     }
 
@@ -344,12 +344,12 @@ async function protegerPagina(perfisPermitidos = null) {
     if (!perfil) perfil = getSessao();
 
     if (!perfil) {
-        window.location.href = "login.html";
+        window.location.href = "/login";
         return null;
     }
 
     if (perfisPermitidos && !perfisPermitidos.includes(perfil.perfil)) {
-        window.location.href = "home.html";
+        window.location.href = "/home";
         return null;
     }
     return perfil;

@@ -1,9 +1,18 @@
 {
   "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
-    {
-      "source": "/",
-      "destination": "/src/pages/login.html"
-    }
+    { "source": "/", "destination": "/login" }
+  ],
+  "rewrites": [
+    { "source": "/login", "destination": "/src/pages/login.html" },
+    { "source": "/home", "destination": "/src/pages/home.html" },
+    { "source": "/contagem", "destination": "/src/pages/Contagem_Culto_RIO.html" },
+    { "source": "/dashboard", "destination": "/src/pages/Contagem_RIO.html" },
+    { "source": "/checkin", "destination": "/src/pages/checkin.html" },
+    { "source": "/programacao", "destination": "/src/pages/programacao.html" },
+    { "source": "/aniversariantes", "destination": "/src/pages/aniversariantes.html" },
+    { "source": "/usuarios", "destination": "/src/pages/usuarios.html" },
+    { "source": "/igrejas", "destination": "/src/pages/igrejas.html" }
   ]
 }
