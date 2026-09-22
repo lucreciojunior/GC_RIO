@@ -383,10 +383,6 @@
                             <label for="novoNome">Nome da Igreja</label>
                             <input type="text" id="novoNome" placeholder="Ex: ALDEIA" required>
                         </div>
-                        <div class="form-group">
-                            <label for="novoEndereco">Endereço</label>
-                            <input type="text" id="novoEndereco" placeholder="Ex: R. Carlos Gomes, 390 - Prado, Recife, PE">
-                        </div>
                     </div>
                     <button type="submit" class="btn-cadastrar">
                         <i class="fa-solid fa-plus"></i> Cadastrar Igreja
@@ -425,10 +421,6 @@
                         <label for="editNome">Nome da Igreja</label>
                         <input type="text" id="editNome" required>
                     </div>
-                    <div class="form-group">
-                        <label for="editEndereco">Endereço</label>
-                        <input type="text" id="editEndereco">
-                    </div>
                 </div>
                 <div class="modal-actions">
                     <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
@@ -462,7 +454,6 @@
 
             const dados = {
                 nome: document.getElementById('novoNome').value.trim().toUpperCase(),
-                endereco: document.getElementById('novoEndereco').value.trim() || null,
             };
 
             try {
@@ -504,7 +495,6 @@
                         <div class="igreja-icon"><i class="fa-solid fa-church"></i></div>
                         <h3>${ig.nome}</h3>
                     </div>
-                    ${ig.endereco ? `<p><i class="fa-solid fa-location-dot"></i> ${ig.endereco}</p>` : '<p><i class="fa-solid fa-location-dot"></i> Endereço não informado</p>'}
                     <div class="igreja-card-actions">
                         <button class="btn-action btn-edit" onclick="abrirEdicao(${ig.id})">
                             <i class="fa-solid fa-pen"></i> Editar
@@ -538,7 +528,6 @@
 
             document.getElementById('editId').value = id;
             document.getElementById('editNome').value = igreja.nome;
-            document.getElementById('editEndereco').value = igreja.endereco || '';
             document.getElementById('modalEditar').classList.add('active');
         }
 
@@ -547,7 +536,6 @@
             const id = parseInt(document.getElementById('editId').value);
             const dados = {
                 nome: document.getElementById('editNome').value.trim().toUpperCase(),
-                endereco: document.getElementById('editEndereco').value.trim() || null,
             };
 
             try {

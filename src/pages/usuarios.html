@@ -469,6 +469,10 @@
                         <select id="editIgreja" required>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="editNascimento">Data de Nascimento (opcional)</label>
+                        <input type="date" id="editNascimento">
+                    </div>
                 </div>
                 <p style="font-size:0.8rem; color:#666; margin-top:4px;">
                     <i class="fa-solid fa-circle-info"></i> O nome de usuário e a senha não podem ser alterados aqui.
@@ -587,6 +591,7 @@
             document.getElementById('editNome').value = user.nome;
             document.getElementById('editPerfil').value = user.perfil;
             document.getElementById('editIgreja').value = user.igreja || '';
+            document.getElementById('editNascimento').value = user.data_nascimento || '';
             document.getElementById('modalEditar').classList.add('active');
         }
 
@@ -596,6 +601,7 @@
                 nome: document.getElementById('editNome').value.trim(),
                 perfil: document.getElementById('editPerfil').value,
                 igreja: document.getElementById('editIgreja').value || null,
+                data_nascimento: document.getElementById('editNascimento').value || null,
             };
 
             try {

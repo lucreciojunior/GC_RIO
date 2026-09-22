@@ -154,10 +154,10 @@ const API = {
         return data;
     },
 
-    async criarIgreja({ nome, endereco }) {
+    async criarIgreja({ nome }) {
         const { data, error } = await _sb
             .from("igrejas")
-            .insert({ nome, endereco })
+            .insert({ nome })
             .select()
             .single();
         if (error) throw new Error(traduzErro(error));

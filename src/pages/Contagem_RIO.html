@@ -21,10 +21,40 @@
         }
         .filtros .campo { display: flex; flex-direction: column; gap: 5px; }
         .filtros label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--texto-muted); letter-spacing: 0.4px; }
-        .filtros select {
+        .filtros select, .filtros input {
             padding: 11px 12px; border: 1.5px solid var(--border-color); border-radius: 10px;
             font-size: 16px; font-family: 'Inter', sans-serif; background: #fafbfa;
         }
+
+        /* Ações de relatório */
+        .relatorio-acoes { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+        .btn-rel {
+            flex: 1; min-width: 150px; border: 1.5px solid var(--verde-medio); background: var(--branco);
+            color: var(--verde-medio); border-radius: 10px; padding: 12px; font-size: 0.88rem; font-weight: 600;
+            cursor: pointer; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 46px; transition: all 0.2s;
+        }
+        .btn-rel:active { background: var(--verde-suave); }
+
+        /* Modal de relatório */
+        .modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+        .modal-ov.active { display: flex; }
+        .modal-rel { background: #fff; border-radius: 16px; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .modal-rel-head { background: var(--verde-escuro); color: #fff; padding: 16px 20px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-rel-head h3 { color: #fff; font-size: 1rem; }
+        .modal-rel-head button { background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; }
+        .modal-rel-body { padding: 20px; }
+        .rel-texto {
+            background: #f0f4f1; border: 1px solid var(--verde-claro); border-radius: 10px; padding: 16px;
+            font-family: monospace; font-size: 0.82rem; white-space: pre-wrap; line-height: 1.5; color: var(--texto);
+            max-height: 380px; overflow-y: auto;
+        }
+        .btn-copiar-rel {
+            width: 100%; margin-top: 14px; background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;
+            border: none; border-radius: 10px; padding: 14px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            font-family: 'Inter', sans-serif; min-height: 50px;
+        }
+        .btn-copiar-rel.copiado { background: var(--verde-medio); }
 
         /* KPIs */
         .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
@@ -78,6 +108,27 @@
         .vazio { text-align: center; padding: 44px 20px; color: var(--texto-muted); }
         .vazio i { font-size: 2.4rem; opacity: 0.35; margin-bottom: 10px; display: block; }
 
+        /* Insights */
+        .insights-lista { display: flex; flex-direction: column; gap: 12px; }
+        .insight {
+            background: var(--branco); border: 1px solid var(--border-color); border-radius: 14px;
+            padding: 16px; display: flex; gap: 14px; align-items: flex-start; box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--verde-medio);
+        }
+        .insight.pos { border-left-color: #25D366; }
+        .insight.neg { border-left-color: #e91e63; }
+        .insight.info { border-left-color: var(--azul, #1565c0); }
+        .insight .ib {
+            width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 1.05rem; color: #fff;
+        }
+        .insight.pos .ib { background: #25D366; }
+        .insight.neg .ib { background: #e91e63; }
+        .insight.info .ib { background: #1565c0; }
+        .insight.neutro .ib { background: var(--verde-medio); }
+        .insight .txt h4 { font-size: 0.95rem; color: var(--verde-escuro); margin-bottom: 3px; }
+        .insight .txt p { font-size: 0.85rem; color: var(--texto-muted); line-height: 1.4; }
+
         @media (max-width: 600px) {
             .chart-box { height: 240px; }
         }
@@ -110,8 +161,23 @@
                     <option value="180">Últimos 6 meses</option>
                     <option value="365">Último ano</option>
                     <option value="0">Tudo</option>
+                    <option value="custom">Período personalizado</option>
                 </select>
             </div>
+            <div class="campo" id="campoDataInicio" style="display:none;">
+                <label>De</label>
+                <input type="date" id="fDataInicio">
+            </div>
+            <div class="campo" id="campoDataFim" style="display:none;">
+                <label>Até</label>
+                <input type="date" id="fDataFim">
+            </div>
+        </div>
+
+        <!-- Ações de relatório -->
+        <div class="relatorio-acoes">
+            <button class="btn-rel" onclick="gerarRelatorio('ultimo')"><i class="fa-solid fa-file-lines"></i> Último culto</button>
+            <button class="btn-rel" onclick="gerarRelatorio('periodo')"><i class="fa-solid fa-chart-simple"></i> Relatório do período</button>
         </div>
 
         <!-- KPIs -->
@@ -124,6 +190,7 @@
             <button class="aba" data-tab="ministerios" onclick="troca('ministerios')"><i class="fa-solid fa-users-gear"></i> Ministérios</button>
             <button class="aba" data-tab="operacional" onclick="troca('operacional')"><i class="fa-solid fa-car"></i> Operacional</button>
             <button class="aba" data-tab="checkins" onclick="troca('checkins')"><i class="fa-solid fa-user-check"></i> Check-ins</button>
+            <button class="aba" data-tab="insights" onclick="troca('insights')"><i class="fa-solid fa-lightbulb"></i> Insights</button>
             <button class="aba" data-tab="tabela" onclick="troca('tabela')"><i class="fa-solid fa-table"></i> Registros</button>
         </div>
 
@@ -211,6 +278,15 @@
             </div>
         </div>
 
+        <!-- INSIGHTS -->
+        <div class="conteudo" id="c-insights">
+            <div id="insightsLista" class="insights-lista"></div>
+            <div class="vazio" id="insightsVazio" style="display:none;">
+                <i class="fa-solid fa-lightbulb"></i>
+                <p>Registre mais contagens para gerar insights.</p>
+            </div>
+        </div>
+
         <!-- REGISTROS -->
         <div class="conteudo" id="c-tabela">
             <div class="card">
@@ -227,6 +303,20 @@
                     <i class="fa-solid fa-inbox"></i>
                     <p>Nenhuma contagem registrada ainda.</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Relatório -->
+    <div class="modal-ov" id="modalRel">
+        <div class="modal-rel">
+            <div class="modal-rel-head">
+                <h3 id="relTitulo">Relatório</h3>
+                <button onclick="fecharRel()">&times;</button>
+            </div>
+            <div class="modal-rel-body">
+                <div class="rel-texto" id="relTexto"></div>
+                <button class="btn-copiar-rel" onclick="copiarRel()"><i class="fa-brands fa-whatsapp"></i> Copiar para WhatsApp</button>
             </div>
         </div>
     </div>
@@ -258,19 +348,33 @@
         function fmtDataFull(iso) { const [a,m,d] = iso.split('-'); return `${d}/${m}/${a}`; }
         function n(v) { return Number(v) || 0; }
 
-        // Aplica filtros de igreja e período
+        // Aplica filtros de igreja e período (aos dados de contagem)
         function filtrar() {
             const igreja = document.getElementById('fIgreja').value;
-            const dias = parseInt(document.getElementById('fPeriodo').value);
             let lista = [...contagens];
             if (igreja) lista = lista.filter(c => c.igreja === igreja);
+            lista = aplicarPeriodo(lista, c => c.data);
+            return lista.sort((a,b) => a.data.localeCompare(b.data));
+        }
+
+        // Aplica o filtro de período (dias ou intervalo personalizado) a qualquer lista
+        function aplicarPeriodo(lista, getData) {
+            const per = document.getElementById('fPeriodo').value;
+            if (per === 'custom') {
+                const ini = document.getElementById('fDataInicio').value;
+                const fim = document.getElementById('fDataFim').value;
+                if (ini) lista = lista.filter(x => getData(x) >= ini);
+                if (fim) lista = lista.filter(x => getData(x) <= fim);
+                return lista;
+            }
+            const dias = parseInt(per);
             if (dias > 0) {
                 const limite = new Date();
                 limite.setDate(limite.getDate() - dias);
-                lista = lista.filter(c => new Date(c.data) >= limite);
+                const limiteStr = limite.toISOString().slice(0,10);
+                lista = lista.filter(x => getData(x) >= limiteStr);
             }
-            // ordena por data crescente para os gráficos de evolução
-            return lista.sort((a,b) => a.data.localeCompare(b.data));
+            return lista;
         }
 
         function renderKPIs(lista) {
@@ -423,6 +527,7 @@
             }, { plugins: { legend: { display: false } } });
 
             renderCheckins();
+            renderInsights(lista);
 
             // Tabela
             const body = document.getElementById('tabelaBody');
@@ -446,16 +551,79 @@
             }
         }
 
+        // Gera insights automáticos a partir dos dados filtrados
+        function renderInsights(lista) {
+            const cont = document.getElementById('insightsLista');
+            const vazio = document.getElementById('insightsVazio');
+            const insights = [];
+
+            if (lista.length < 2) {
+                cont.innerHTML = '';
+                vazio.style.display = 'block';
+                return;
+            }
+            vazio.style.display = 'none';
+
+            const soma = (campo) => lista.reduce((s,c)=>s+n(c[campo]),0);
+            const med = (campo) => Math.round(soma(campo)/lista.length);
+
+            // 1. Tendência de crescimento (compara metades)
+            const meio = Math.floor(lista.length/2);
+            const med1 = lista.slice(0,meio).reduce((s,c)=>s+n(c.total_geral),0)/(meio||1);
+            const med2 = lista.slice(meio).reduce((s,c)=>s+n(c.total_geral),0)/((lista.length-meio)||1);
+            if (med1 > 0) {
+                const var_ = Math.round(((med2-med1)/med1)*100);
+                if (var_ >= 5) insights.push({ tipo:'pos', ico:'fa-arrow-trend-up', h:`Público em crescimento (+${var_}%)`, p:`A média de público subiu de ${Math.round(med1)} para ${Math.round(med2)} pessoas na comparação entre o início e o fim do período.` });
+                else if (var_ <= -5) insights.push({ tipo:'neg', ico:'fa-arrow-trend-down', h:`Público em queda (${var_}%)`, p:`A média caiu de ${Math.round(med1)} para ${Math.round(med2)} pessoas. Vale investigar o que mudou nesse período.` });
+                else insights.push({ tipo:'neutro', ico:'fa-equals', h:'Público estável', p:`A média de público se manteve estável (~${Math.round(med2)} pessoas por culto).` });
+            }
+
+            // 2. Melhor e pior culto
+            const ordenado = [...lista].sort((a,b)=>n(b.total_geral)-n(a.total_geral));
+            const melhor = ordenado[0], pior = ordenado[ordenado.length-1];
+            const fd = (iso) => { const [a,m,d]=iso.split('-'); return `${d}/${m}`; };
+            insights.push({ tipo:'info', ico:'fa-trophy', h:`Maior público: ${n(melhor.total_geral)} pessoas`, p:`Registrado em ${fd(melhor.data)}${melhor.responsavel?', com '+melhor.responsavel:''}.` });
+
+            // 3. Taxa de visitantes
+            const totGeral = soma('total_geral');
+            const taxaVis = totGeral ? Math.round((soma('total_visitantes')/totGeral)*100) : 0;
+            if (taxaVis > 0) {
+                const tv = { ico:'fa-user-plus', h:`Visitantes: ${taxaVis}% do público`, p:`No período, ${soma('total_visitantes')} visitantes passaram pela igreja. ${taxaVis >= 10 ? 'Ótimo alcance de novas pessoas!' : 'Uma ação de convite pode aumentar esse número.'}` };
+                tv.tipo = taxaVis >= 10 ? 'pos' : 'info';
+                insights.push(tv);
+            }
+
+            // 4. Proporção de servos
+            const propServ = totGeral ? Math.round((soma('total_servos')/totGeral)*100) : 0;
+            if (propServ > 0) {
+                insights.push({ tipo:'info', ico:'fa-hands-holding-child', h:`Servos: ${propServ}% do público`, p:`Em média, ${med('total_servos')} servos por culto sustentam a operação. ${propServ >= 20 ? 'Equipe robusta.' : 'Há espaço para engajar mais voluntários.'}` });
+            }
+
+            // 5. Crianças
+            const propCri = totGeral ? Math.round((soma('total_criancas')/totGeral)*100) : 0;
+            if (propCri > 0) {
+                insights.push({ tipo:'neutro', ico:'fa-children', h:`Público infantil: ${propCri}%`, p:`Média de ${med('total_criancas')} crianças por culto. Importante manter estrutura adequada no ministério infantil.` });
+            }
+
+            // 6. Estacionamento (ocupação média)
+            const veic = lista.reduce((s,c)=>{ const d=c.dados||{}; return s+n(d.rioParkingCarros)+n(d.rioParkingMotos); },0);
+            if (veic > 0) {
+                insights.push({ tipo:'neutro', ico:'fa-car', h:`~${Math.round(veic/lista.length)} veículos por culto`, p:`Considere isso no planejamento de vagas e equipe do RIO Parking.` });
+            }
+
+            cont.innerHTML = insights.map(i => `
+                <div class="insight ${i.tipo}">
+                    <div class="ib"><i class="fa-solid ${i.ico}"></i></div>
+                    <div class="txt"><h4>${i.h}</h4><p>${i.p}</p></div>
+                </div>`).join('');
+        }
+
         // Renderiza a aba de Check-ins (respeita filtro de igreja e período)
         function renderCheckins() {
             const igreja = document.getElementById('fIgreja').value;
-            const dias = parseInt(document.getElementById('fPeriodo').value);
             let lista = [...checkins];
             if (igreja) lista = lista.filter(c => c.igreja === igreja);
-            if (dias > 0) {
-                const limite = new Date(); limite.setDate(limite.getDate() - dias);
-                lista = lista.filter(c => new Date(c.data) >= limite);
-            }
+            lista = aplicarPeriodo(lista, c => c.data);
 
             // Datas únicas com presença
             const datas = [...new Set(lista.map(c => c.data))].sort();
@@ -539,10 +707,130 @@
             }
 
             document.getElementById('fIgreja').addEventListener('change', render);
-            document.getElementById('fPeriodo').addEventListener('change', render);
+            document.getElementById('fPeriodo').addEventListener('change', () => {
+                const custom = document.getElementById('fPeriodo').value === 'custom';
+                document.getElementById('campoDataInicio').style.display = custom ? 'flex' : 'none';
+                document.getElementById('campoDataFim').style.display = custom ? 'flex' : 'none';
+                render();
+            });
+            document.getElementById('fDataInicio').addEventListener('change', render);
+            document.getElementById('fDataFim').addEventListener('change', render);
 
             render();
         })();
+
+        // ============================================================
+        // Geração de relatórios (WhatsApp)
+        // ============================================================
+        const MIN_LABELS = [
+            ['Integração Servos','integracaoServos'],['Integração Visitantes','integracaoVisitantes'],
+            ['Intercessão','intercessao'],['Gestão de Culto','gestaoCulto'],['Comunicação','comunicacao'],
+            ['Mídia Servos','midiaServos'],['Mídia Online','midiaOnline'],['Pré-Live','preLive'],['RIO Band','rioBand'],
+            ['Café RIO','cafeRio'],['RIO Store','rioStore'],['Geração RIO Servos','geracaoRioServos'],
+            ['Geração RIO Crianças','geracaoRioCriancas'],['Nauta Servos','nautaServos'],
+            ['Nauta Pré-Adol.','nautaPreAdolescentes'],['Berçário Adulto','bercarioAdulto'],
+            ['Berçário Crianças','bercarioCriancas'],['Parking Servos','rioParkingServos'],
+            ['Parking Carros','rioParkingCarros'],['Parking Motos','rioParkingMotos'],['Parking Bicicletas','rioParkingBicicletas']
+        ];
+
+        function gerarRelatorio(tipo) {
+            let texto = '';
+            if (tipo === 'ultimo') {
+                // Pega a contagem mais recente (respeitando filtro de igreja)
+                const igreja = document.getElementById('fIgreja').value;
+                let base = [...contagens];
+                if (igreja) base = base.filter(c => c.igreja === igreja);
+                if (base.length === 0) { alert('Nenhuma contagem encontrada.'); return; }
+                const ultima = base.sort((a,b) => b.data.localeCompare(a.data))[0];
+                texto = relatorioCulto(ultima);
+                document.getElementById('relTitulo').textContent = 'Relatório do último culto';
+            } else {
+                const lista = filtrar();
+                if (lista.length === 0) { alert('Nenhuma contagem no período selecionado.'); return; }
+                texto = relatorioPeriodo(lista);
+                document.getElementById('relTitulo').textContent = 'Relatório do período';
+            }
+            document.getElementById('relTexto').textContent = texto;
+            document.getElementById('modalRel').classList.add('active');
+        }
+
+        function relatorioCulto(c) {
+            const d = c.dados || {};
+            const [a,m,dia] = c.data.split('-');
+            let t = `⛪ *CONTAGEM DE CULTO - IGREJA RIO*\n`;
+            t += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            t += `📍 *Igreja:* ${c.igreja}\n`;
+            t += `📅 *Data:* ${dia}/${m}/${a}\n`;
+            t += `🕐 *Horário:* ${c.horario || '—'}\n`;
+            t += `👤 *Responsável:* ${c.responsavel || '—'}\n\n`;
+            t += `━━━━━━━━━━━━━━━━━━━━━\n📊 *RESUMO*\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            t += `🏛️ Templo: ${n(c.total_templo)}\n`;
+            t += `🙏 Servos: ${n(c.total_servos)}\n`;
+            t += `👶 Crianças: ${n(c.total_criancas)}\n`;
+            t += `🧒 Nauta: ${n(c.total_nauta)}\n`;
+            t += `🆕 Visitantes: ${n(c.total_visitantes)}\n\n`;
+            t += `🎯 *TOTAL GERAL: ${n(c.total_geral)} pessoas*\n\n`;
+            t += `━━━━━━━━━━━━━━━━━━━━━\n📋 *POR MINISTÉRIO*\n━━━━━━━━━━━━━━━━━━━━━\n`;
+            MIN_LABELS.forEach(([label, campo]) => {
+                if (d[campo] !== undefined && d[campo] !== null) t += `• ${label}: ${n(d[campo])}\n`;
+            });
+            t += `\n_RIO - Relevante, Integral e Orgânico_`;
+            return t;
+        }
+
+        function relatorioPeriodo(lista) {
+            const soma = (campo) => lista.reduce((s,c)=>s+n(c[campo]),0);
+            const med = (campo) => lista.length ? Math.round(soma(campo)/lista.length) : 0;
+            const igreja = document.getElementById('fIgreja').value || 'Todas as igrejas';
+            const datas = lista.map(c => c.data).sort();
+            const [a1,m1,d1] = datas[0].split('-');
+            const [a2,m2,d2] = datas[datas.length-1].split('-');
+            const maior = lista.reduce((mx,c)=> n(c.total_geral)>n(mx.total_geral)?c:mx, lista[0]);
+            const [ma,mm,md] = maior.data.split('-');
+
+            let t = `📊 *RELATÓRIO GERENCIAL - IGREJA RIO*\n`;
+            t += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            t += `📍 *Igreja:* ${igreja}\n`;
+            t += `📆 *Período:* ${d1}/${m1}/${a1} a ${d2}/${m2}/${a2}\n`;
+            t += `📋 *Cultos no período:* ${lista.length}\n\n`;
+            t += `━━━━━━━━━━━━━━━━━━━━━\n📈 *MÉDIAS POR CULTO*\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            t += `👥 Público geral: ${med('total_geral')}\n`;
+            t += `🏛️ Templo: ${med('total_templo')}\n`;
+            t += `🙏 Servos: ${med('total_servos')}\n`;
+            t += `👶 Crianças: ${med('total_criancas')}\n`;
+            t += `🧒 Nauta: ${med('total_nauta')}\n\n`;
+            t += `━━━━━━━━━━━━━━━━━━━━━\n🏆 *DESTAQUES*\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            t += `🔝 Maior público: ${n(maior.total_geral)} (${md}/${mm}/${ma})\n`;
+            t += `🆕 Total de visitantes: ${soma('total_visitantes')}\n`;
+            const totGeral = soma('total_geral');
+            const taxa = totGeral ? Math.round((soma('total_visitantes')/totGeral)*100) : 0;
+            t += `📊 Taxa de visitantes: ${taxa}%\n\n`;
+            t += `_RIO - Relevante, Integral e Orgânico_`;
+            return t;
+        }
+
+        function copiarRel() {
+            const texto = document.getElementById('relTexto').textContent;
+            navigator.clipboard.writeText(texto).then(sucessoCopia).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = texto; document.body.appendChild(ta); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+                sucessoCopia();
+            });
+        }
+        function sucessoCopia() {
+            const btn = document.querySelector('.btn-copiar-rel');
+            btn.classList.add('copiado');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
+            setTimeout(() => {
+                btn.classList.remove('copiado');
+                btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Copiar para WhatsApp';
+            }, 3000);
+        }
+        function fecharRel() { document.getElementById('modalRel').classList.remove('active'); }
+        document.getElementById('modalRel').addEventListener('click', function(e) {
+            if (e.target === this) fecharRel();
+        });
     </script>
 
 </body>
